@@ -76,6 +76,7 @@ function WorkCard({
           fill
           className="object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
           sizes="(max-width: 768px) 100vw, 50vw"
+          unoptimized
         />
         <div className="absolute inset-x-0 bottom-0 p-5 md:p-6 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           <div className="text-xs font-mono uppercase tracking-widest text-muted">
@@ -86,7 +87,7 @@ function WorkCard({
       </motion.div>
       <div className="mt-4 flex items-baseline justify-between gap-4">
         <div>
-          <div className="font-display text-2xl tracking-tight group-hover:italic transition-all">
+          <div className="font-display text-2xl tracking-tight group-hover:text-white transition-colors">
             {work.title}
           </div>
           <div className="text-xs font-mono tracking-widest text-subtle mt-1">

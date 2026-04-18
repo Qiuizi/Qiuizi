@@ -29,12 +29,13 @@ export function Hero() {
         className="absolute inset-0 will-change-transform"
       >
         <Image
-          src="https://picsum.photos/seed/sp-hero/2400/1600"
+          src="/api/placeholder?seed=sp-hero&w=2400&h=1600"
           alt=""
           fill
           priority
           className="object-cover"
           sizes="100vw"
+          unoptimized
         />
       </motion.div>
 

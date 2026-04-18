@@ -45,6 +45,7 @@ export function HorizontalGallery({ works }: { works: Work[] }) {
                   fill
                   className="object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
                   sizes="(max-width: 768px) 70vw, 48vw"
+                  unoptimized
                 />
                 <div className="absolute top-5 left-5 right-5 flex items-start justify-between">
                   <span className="text-xs font-mono tracking-widest text-white/80">
@@ -57,7 +58,7 @@ export function HorizontalGallery({ works }: { works: Work[] }) {
               </div>
               <div className="mt-5 flex items-baseline justify-between gap-6">
                 <div>
-                  <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:italic transition-all">
+                  <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:text-white transition-colors">
                     {w.title}
                   </div>
                   <div className="text-xs font-mono tracking-widest text-subtle mt-1.5">

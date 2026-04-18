@@ -72,7 +72,7 @@ export default async function NotePage({
           {prev ? (
             <Link href={`/notes/${prev.slug}`} className="group">
               <div className="text-xs text-subtle mb-1">下一篇 ↘</div>
-              <div className="font-display text-xl group-hover:italic transition-all">
+              <div className="font-display text-xl group-hover:text-white transition-colors">
                 {prev.title}
               </div>
             </Link>
@@ -82,7 +82,7 @@ export default async function NotePage({
           {next ? (
             <Link href={`/notes/${next.slug}`} className="group text-right">
               <div className="text-xs text-subtle mb-1">↖ 上一篇</div>
-              <div className="font-display text-xl group-hover:italic transition-all">
+              <div className="font-display text-xl group-hover:text-white transition-colors">
                 {next.title}
               </div>
             </Link>

@@ -52,7 +52,7 @@ export default function WorksPage() {
                   <div className="col-span-2 md:col-span-1 text-xs font-mono text-subtle">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="col-span-10 md:col-span-5 font-display text-xl md:text-2xl tracking-tight group-hover:italic transition-all">
+                  <div className="col-span-10 md:col-span-5 font-display text-xl md:text-2xl tracking-tight group-hover:text-white transition-colors">
                     {w.title}
                     <span className="ml-3 text-sm font-sans text-subtle align-middle">
                       {w.titleEn}

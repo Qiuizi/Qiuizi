@@ -45,6 +45,7 @@ export default async function WorkPage({
           priority
           className="object-cover"
           sizes="100vw"
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         <div className="absolute inset-x-0 bottom-0 px-6 md:px-10 pb-20 md:pb-24">
@@ -143,6 +144,7 @@ export default async function WorkPage({
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 84vw"
+                    unoptimized
                   />
                 </div>
                 {item.caption && (
@@ -162,7 +164,7 @@ export default async function WorkPage({
           <span className="text-subtle group-hover:text-foreground transition">←</span>
           <div>
             <div className="text-xs text-subtle">上一组</div>
-            <div className="font-display text-lg group-hover:italic transition-all">
+            <div className="font-display text-lg group-hover:text-white transition-colors">
               {prev.title}
             </div>
           </div>
@@ -173,7 +175,7 @@ export default async function WorkPage({
         >
           <div>
             <div className="text-xs text-subtle">下一组</div>
-            <div className="font-display text-lg group-hover:italic transition-all">
+            <div className="font-display text-lg group-hover:text-white transition-colors">
               {next.title}
             </div>
           </div>

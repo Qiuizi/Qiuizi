@@ -90,7 +90,7 @@ export default async function Home() {
                   <div className="col-span-2 md:col-span-1 text-xs font-mono text-subtle">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="col-span-10 md:col-span-7 font-display text-2xl md:text-3xl tracking-tight group-hover:italic transition-all">
+                  <div className="col-span-10 md:col-span-7 font-display text-2xl md:text-3xl tracking-tight group-hover:text-white transition-colors">
                     {n.title}
                   </div>
                   <div className="hidden md:block md:col-span-3 text-sm text-muted truncate">

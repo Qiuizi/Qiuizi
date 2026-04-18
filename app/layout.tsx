@@ -43,18 +43,6 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${inter.variable} ${instrument.variable} ${jetbrains.variable}`}
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body className="bg-background text-foreground font-sans">
         <SmoothScroll />
         <Nav />

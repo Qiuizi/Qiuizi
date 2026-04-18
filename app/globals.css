@@ -8,18 +8,27 @@
   --color-line: #1c1917;
   --color-accent: #e7e5e4;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
-    "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-  --font-display: var(--font-instrument), "Noto Serif SC", ui-serif, Georgia,
-    "Songti SC", "STSong", serif;
+  /* 中文优先走系统字体：Mac 苹方、Win 微软雅黑、思源系列。
+     Latin 部分走 Inter / Instrument Serif（next/font 自托管）。 */
+  --font-sans: var(--font-inter), ui-sans-serif, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei UI",
+    "Microsoft YaHei", "Source Han Sans CN", "Noto Sans CJK SC",
+    "Source Han Sans SC", "HarmonyOS Sans SC", sans-serif;
+  --font-display: var(--font-instrument), ui-serif, Georgia, "Songti SC",
+    "STSong", "Source Han Serif SC", "Noto Serif CJK SC",
+    "Microsoft YaHei UI", serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+    Consolas, monospace;
 }
 
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* 关键：禁止浏览器把中文字符强行斜切（Windows 下的 SimSun 斜体极丑）。
+     开启后 font-style: italic 只影响真正有 italic 字形的 Latin 字体，
+     中文保持正体。 */
+  font-synthesis-style: none;
 }
 
 html {

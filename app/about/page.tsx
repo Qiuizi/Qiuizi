@@ -35,11 +35,12 @@ export default function AboutPage() {
             <Reveal>
               <div className="relative aspect-[4/5] bg-line overflow-hidden">
                 <Image
-                  src="https://picsum.photos/seed/sp-about/1200/1500"
+                  src="/api/placeholder?seed=sp-about&w=1200&h=1500"
                   alt="肖像占位"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 40vw"
+                  unoptimized
                 />
               </div>
               <div className="mt-3 text-xs font-mono text-subtle">

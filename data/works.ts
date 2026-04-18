@@ -17,8 +17,10 @@ export type Work = {
   gallery: { src: string; alt: string; caption?: string }[];
 };
 
-const pic = (id: number, w = 1800, h = 1200) =>
-  `https://picsum.photos/seed/sp-${id}/${w}/${h}`;
+// 本地 SVG 占位图（调用 app/api/placeholder/route.ts 生成）
+// 领导要换成真实作品：把 cover / gallery.src 改成 "/works/xxx.jpg"，文件放 public/works/ 下即可
+const pic = (id: number, w = 1800, h = 1200, label = "") =>
+  `/api/placeholder?seed=sp-${id}&w=${w}&h=${h}${label ? `&label=${encodeURIComponent(label)}` : ""}`;
 
 export const works: Work[] = [
   {
