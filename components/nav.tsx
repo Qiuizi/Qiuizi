@@ -13,6 +13,9 @@ export function Nav() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
+  // 首页自带 demo 的 glass nav，layout 这里不渲染。
+  if (pathname === "/") return null;
+
   return (
     <>
       <header className="glass-nav fixed inset-x-0 top-0 z-50 border-b border-line/60">

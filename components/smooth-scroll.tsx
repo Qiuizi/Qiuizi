@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 export function SmoothScroll() {
+  const pathname = usePathname();
   useEffect(() => {
+    // 首页是自定义 wheel 分页，禁用 Lenis 避免打架。
+    if (pathname === "/") return;
+
     const lenis = new Lenis({
       duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -22,7 +27,7 @@ export function SmoothScroll() {
       cancelAnimationFrame(id);
       lenis.destroy();
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

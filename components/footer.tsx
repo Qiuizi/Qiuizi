@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { site } from "@/lib/site";
 
 export function Footer() {
+  const pathname = usePathname();
+  // 首页是全屏分页 demo，不渲染 footer。
+  if (pathname === "/") return null;
+
   const year = new Date().getFullYear();
   return (
     <footer className="relative border-t border-line mt-24 overflow-hidden">
