@@ -68,13 +68,26 @@ export function Hero() {
         </div>
 
         <div>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="font-display italic text-muted mb-6 md:mb-8"
+            style={{ fontSize: "clamp(1.25rem, 2.4vw, 2.25rem)" }}
+          >
+            — {site.nameLatin.toLowerCase()}
+          </motion.div>
+
           <motion.h1
-            className="font-display leading-[0.88] tracking-tighter"
-            style={{ fontSize: "clamp(3.5rem, 14vw, 14rem)" }}
+            className="font-display"
+            style={{
+              fontSize: "clamp(3rem, 10.5vw, 9.5rem)",
+              lineHeight: 1.08,
+              letterSpacing: "0",
+            }}
           >
             <TextReveal delay={0.3}>{site.name}</TextReveal>
-            <br />
-            <span className="italic text-muted">
+            <span className="block italic text-muted">
               <TextReveal delay={0.55}>的空间</TextReveal>
             </span>
           </motion.h1>
@@ -83,7 +96,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.9 }}
-            className="mt-8 max-w-md text-muted leading-[1.9] text-balance"
+            className="mt-12 max-w-md text-muted leading-[1.9] text-balance"
           >
             {site.tagline}。{site.bio}
           </motion.p>
