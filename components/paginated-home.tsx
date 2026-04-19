@@ -225,7 +225,7 @@ export function PaginatedHome() {
                     <span className="text-[10px] tracking-widest text-zinc-500 uppercase">创立至今</span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-3xl font-display text-white tracking-wider">Shanghai</span>
+                    <span className="text-3xl font-display text-white tracking-wider">Chengdu</span>
                     <span className="text-[10px] tracking-widest text-zinc-500 uppercase">常驻城市</span>
                   </div>
                 </div>
