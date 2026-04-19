@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { site } from "@/lib/site";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+// Latin 显示衬线 —— 保留 Instrument Serif（italic 很好看）
 const instrument = Instrument_Serif({
   variable: "--font-instrument",
   subsets: ["latin"],
@@ -19,6 +15,7 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
+// 等宽
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
@@ -41,8 +38,16 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${inter.variable} ${instrument.variable} ${jetbrains.variable}`}
+      className={`${GeistSans.variable} ${instrument.variable} ${jetbrains.variable}`}
     >
+      <head>
+        {/* 自托管霞鹜文楷屏幕阅读版（GB 子集版）—— 97 个 woff2 按 unicode-range 分片，
+            每页实际只下载几个子集，首屏也能用。文件在 /public/fonts/lxgw/ 下。 */}
+        <link
+          rel="stylesheet"
+          href="/fonts/lxgw/lxgwwenkaigbscreen.css"
+        />
+      </head>
       <body className="bg-background text-foreground font-sans">
         <SmoothScroll />
         <Nav />
