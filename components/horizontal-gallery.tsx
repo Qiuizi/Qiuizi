@@ -58,7 +58,7 @@ export function HorizontalGallery({ works }: { works: Work[] }) {
               </div>
               <div className="mt-5 flex items-baseline justify-between gap-6">
                 <div>
-                  <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:text-white transition-colors">
+                  <div className="font-display text-3xl md:text-4xl leading-[1.3] group-hover:text-white transition-colors">
                     {w.title}
                   </div>
                   <div className="text-xs font-mono tracking-widest text-subtle mt-1.5">

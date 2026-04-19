@@ -19,8 +19,12 @@ export default function AboutPage() {
           </Reveal>
           <Reveal delay={0.1}>
             <h1
-              className="font-display leading-[0.9] tracking-tighter text-balance"
-              style={{ fontSize: "clamp(3rem, 11vw, 11rem)" }}
+              className="font-display text-balance"
+              style={{
+                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                lineHeight: 1.1,
+                letterSpacing: "0",
+              }}
             >
               我是
               <span className="italic text-muted">{site.name}</span>。
@@ -51,7 +55,7 @@ export default function AboutPage() {
 
           <div className="md:col-span-7 space-y-10">
             <Reveal>
-              <p className="font-display text-3xl md:text-4xl leading-[1.5] tracking-tight text-balance">
+              <p className="font-display text-3xl md:text-4xl leading-[1.5] text-balance">
                 {site.bio}
               </p>
             </Reveal>

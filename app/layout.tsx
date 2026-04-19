@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
+// 思源宋体 (Noto Serif SC) —— 用作中文 display 字体。
+// 按 unicode-range 分片，每页只下载实际用到的字符子集。
+import "@fontsource/noto-serif-sc/chinese-simplified-400.css";
+import "@fontsource/noto-serif-sc/chinese-simplified-500.css";
 import "./globals.css";
 import { site } from "@/lib/site";
 import { SmoothScroll } from "@/components/smooth-scroll";

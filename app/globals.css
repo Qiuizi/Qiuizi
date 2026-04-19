@@ -8,15 +8,16 @@
   --color-line: #1c1917;
   --color-accent: #e7e5e4;
 
-  /* Latin 正文走 Geist（Vercel 自家现代无衬线，比 Inter 更挺拔）；
-     Latin 显示走 Instrument Serif（italic 极佳）；
-     中文走 霞鹜文楷屏幕阅读版（自托管，编辑感强）。
-     字体栈里把 Latin 的字体放在最前面，中文字符自动 fall through 到 LXGW。 */
+  /* 字体分工：
+     · 正文 —— Latin 走 Geist Sans（现代挺拔），中文走 LXGW 霞鹜文楷屏幕版（编辑/手写感）。
+     · 显示 —— Latin 走 Instrument Serif（italic 极佳），中文走 Noto Serif SC 思源宋体
+       （明朝体，display 尺寸够架构感，不飘）。
+     Latin 字族放最前，中文字符自动 fall through 到中文字族。 */
   --font-sans: var(--font-geist-sans), "LXGW WenKai Screen", ui-sans-serif,
     -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Microsoft YaHei UI", sans-serif;
-  --font-display: var(--font-instrument), "LXGW WenKai Screen", ui-serif,
-    Georgia, "Songti SC", "STSong", serif;
+  --font-display: var(--font-instrument), "Noto Serif SC", "Songti SC",
+    "STSong", ui-serif, Georgia, serif;
   --font-chinese: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei UI",
     sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo,
@@ -93,10 +94,18 @@ html.lenis body {
   background: #44403c;
 }
 
-/* Chinese display refinement */
+/* Chinese display refinement
+   · palt 开启比例宽度（中文 display 下字间距更顺）
+   · font-weight: 500 让思源宋体在 display 尺寸下有足够骨架
+   · 内部的 .italic（Latin accent）回落到 400，避免 Instrument Serif 合成粗体 */
 .font-display:lang(zh),
 .font-display {
   font-feature-settings: "palt";
+  font-weight: 500;
+}
+.font-display .italic,
+.font-display.italic {
+  font-weight: 400;
 }
 
 /* Utility: text balance for headlines */

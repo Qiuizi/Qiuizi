@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-line mt-32">
       <div className="px-6 md:px-10 py-16 grid grid-cols-2 md:grid-cols-4 gap-10">
         <div className="col-span-2">
-          <div className="font-display text-4xl md:text-6xl leading-[0.95] tracking-tight">
+          <div className="font-display text-4xl md:text-6xl leading-[1.15]">
             让我们
             <br />
             保持联系。

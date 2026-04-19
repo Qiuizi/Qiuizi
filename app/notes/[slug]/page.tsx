@@ -50,8 +50,12 @@ export default async function NotePage({
           </div>
         </Reveal>
         <Reveal delay={0.08}>
-          <h1 className="font-display mt-6 leading-[1.05] tracking-tight text-balance"
-              style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}>
+          <h1 className="font-display mt-6 text-balance"
+              style={{
+                fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)",
+                lineHeight: 1.2,
+                letterSpacing: "0",
+              }}>
             {meta.title}
           </h1>
         </Reveal>

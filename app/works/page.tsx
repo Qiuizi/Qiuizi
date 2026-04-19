@@ -19,8 +19,12 @@ export default function WorksPage() {
           </Reveal>
           <Reveal delay={0.1}>
             <h1
-              className="font-display leading-[0.9] tracking-tighter text-balance"
-              style={{ fontSize: "clamp(3rem, 11vw, 11rem)" }}
+              className="font-display text-balance"
+              style={{
+                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                lineHeight: 1.1,
+                letterSpacing: "0",
+              }}
             >
               我看见的，
               <br />
@@ -52,7 +56,7 @@ export default function WorksPage() {
                   <div className="col-span-2 md:col-span-1 text-xs font-mono text-subtle">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="col-span-10 md:col-span-5 font-display text-xl md:text-2xl tracking-tight group-hover:text-white transition-colors">
+                  <div className="col-span-10 md:col-span-5 font-display text-xl md:text-2xl leading-[1.35] group-hover:text-white transition-colors">
                     {w.title}
                     <span className="ml-3 text-sm font-sans text-subtle align-middle">
                       {w.titleEn}

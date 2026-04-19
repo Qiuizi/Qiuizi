@@ -6,7 +6,7 @@ export function Marquee({ items }: { items: string[] }) {
         {doubled.map((item, i) => (
           <span
             key={i}
-            className="font-display text-5xl md:text-7xl tracking-tight text-subtle"
+            className="font-display text-5xl md:text-7xl text-subtle"
           >
             {item}
             <span className="mx-10 text-foreground/40">✦</span>

@@ -27,7 +27,7 @@ export default async function Home() {
             </div>
             <div className="md:col-span-9">
               <Reveal>
-                <p className="font-display text-3xl md:text-[2.6rem] leading-[1.5] tracking-tight text-balance">
+                <p className="font-display text-3xl md:text-[2.4rem] leading-[1.55] text-balance">
                   {site.tagline}。{site.bio}
                   <span className="block mt-4 text-subtle italic">
                     Welcome — feel free to wander.
@@ -62,7 +62,7 @@ export default async function Home() {
               <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-4">
                 Recent Notes · 随笔
               </div>
-              <h2 className="font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance">
+              <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
                 写下来的
                 <br />
                 <span className="italic text-muted">一点点想法。</span>
@@ -90,7 +90,7 @@ export default async function Home() {
                   <div className="col-span-2 md:col-span-1 text-xs font-mono text-subtle">
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div className="col-span-10 md:col-span-7 font-display text-2xl md:text-3xl tracking-tight group-hover:text-white transition-colors">
+                  <div className="col-span-10 md:col-span-7 font-display text-2xl md:text-3xl leading-[1.35] group-hover:text-white transition-colors">
                     {n.title}
                   </div>
                   <div className="hidden md:block md:col-span-3 text-sm text-muted truncate">

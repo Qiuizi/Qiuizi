@@ -21,8 +21,12 @@ export default async function NotesIndex() {
           </Reveal>
           <Reveal delay={0.1}>
             <h1
-              className="font-display leading-[0.9] tracking-tighter text-balance"
-              style={{ fontSize: "clamp(3rem, 11vw, 11rem)" }}
+              className="font-display text-balance"
+              style={{
+                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                lineHeight: 1.1,
+                letterSpacing: "0",
+              }}
             >
               慢一点，
               <br />
@@ -51,7 +55,7 @@ export default async function NotesIndex() {
                       {String(i + 1).padStart(2, "0")}
                     </div>
                     <div className="col-span-10 md:col-span-7">
-                      <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:text-white transition-colors text-balance">
+                      <div className="font-display text-3xl md:text-4xl leading-[1.3] group-hover:text-white transition-colors text-balance">
                         {n.title}
                       </div>
                       <div className="mt-3 text-sm text-muted leading-[1.9]">

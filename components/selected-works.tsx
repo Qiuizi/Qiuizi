@@ -15,7 +15,7 @@ export function SelectedWorks({ works }: { works: Work[] }) {
             <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-4">
               Selected Works · 精选
             </div>
-            <h2 className="font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-balance">
+            <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
               那些值得
               <br />
               <span className="italic text-muted">被再看一次</span>的。
@@ -87,7 +87,7 @@ function WorkCard({
       </motion.div>
       <div className="mt-4 flex items-baseline justify-between gap-4">
         <div>
-          <div className="font-display text-2xl tracking-tight group-hover:text-white transition-colors">
+          <div className="font-display text-2xl group-hover:text-white transition-colors">
             {work.title}
           </div>
           <div className="text-xs font-mono tracking-widest text-subtle mt-1">

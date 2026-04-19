@@ -58,12 +58,16 @@ export default async function WorkPage({
               <span>{work.location}</span>
             </div>
             <h1
-              className="font-display text-white leading-[0.9] tracking-tighter text-balance"
-              style={{ fontSize: "clamp(3rem, 11vw, 11rem)" }}
+              className="font-display text-white text-balance"
+              style={{
+                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                lineHeight: 1.1,
+                letterSpacing: "0",
+              }}
             >
               {work.title}
             </h1>
-            <div className="mt-3 font-display italic text-white/60 text-2xl md:text-4xl">
+            <div className="mt-4 font-display italic text-white/60 text-2xl md:text-4xl">
               {work.titleEn}
             </div>
           </div>
@@ -116,7 +120,7 @@ export default async function WorkPage({
 
           <div className="md:col-span-9">
             <Reveal>
-              <p className="font-display text-2xl md:text-3xl leading-[1.6] tracking-tight text-balance">
+              <p className="font-display text-2xl md:text-3xl leading-[1.6] text-balance">
                 {work.summary}
               </p>
             </Reveal>
