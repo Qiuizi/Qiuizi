@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { HorizontalGallery } from "@/components/horizontal-gallery";
+import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "@/components/reveal";
 import { works } from "@/data/works";
 
@@ -10,52 +11,64 @@ export const metadata: Metadata = {
 export default function WorksPage() {
   return (
     <>
-      <section className="px-6 md:px-10 pt-48 pb-24">
-        <div className="max-w-5xl">
+      {/* 页首 */}
+      <section className="relative px-6 md:px-10 pt-40 pb-20 overflow-hidden">
+        <div className="blob" style={{ top: "-10%", right: "-5%", width: 520, height: 520, background: "#818cf8", opacity: 0.12 }} />
+        <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
+            <div className="text-xs tracking-[0.4em] uppercase text-accent mb-6">
+              Archive · {String(works.length).padStart(2, "0")} pieces
+            </div>
+          </Reveal>
+          <Reveal delay={0.08}>
             <h1
               className="font-display text-balance"
               style={{
-                fontSize: "clamp(2.75rem, 9vw, 8rem)",
-                lineHeight: 1.1,
-                letterSpacing: "0",
+                fontSize: "clamp(2.75rem, 10vw, 9rem)",
+                lineHeight: 1.02,
+                letterSpacing: "-0.02em",
               }}
             >
-              我看见的，
-              <br />
-              <span className="italic text-muted">和我想让你看见的。</span>
+              Every frame, <span className="italic text-accent">a sentence</span>.
             </h1>
           </Reveal>
         </div>
       </section>
 
-      <HorizontalGallery works={works} />
-
-      <section className="px-6 md:px-10 py-32 border-t border-line">
-        <div className="max-w-6xl mx-auto">
-          <ul className="divide-y divide-line border-y border-line">
-            {works.map((w) => (
-              <li key={w.slug}>
-                <a
-                  href={`/works/${w.slug}`}
-                  className="group grid grid-cols-12 gap-6 py-8 items-baseline hover:bg-white/[0.015] transition px-2 -mx-2"
-                >
-                  <div className="col-span-12 md:col-span-7 font-display text-2xl md:text-3xl leading-[1.35] group-hover:text-white transition-colors">
+      {/* 网格 */}
+      <section className="px-6 md:px-10 pb-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+          {works.map((w, i) => (
+            <Reveal key={w.slug} delay={(i % 2) * 0.08}>
+              <Link href={`/works/${w.slug}`} className="group block">
+                <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-panel">
+                  <Image
+                    src={w.cover}
+                    alt={w.coverAlt}
+                    fill
+                    className="object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute top-5 left-6 text-[11px] uppercase tracking-[0.3em] text-white/80 tabular-nums">
+                    {String(i + 1).padStart(2, "0")} — {w.year}
+                  </div>
+                </div>
+                <div className="mt-6 flex items-baseline justify-between gap-4">
+                  <div className="font-display text-2xl md:text-3xl group-hover:text-accent transition-colors leading-tight">
                     {w.title}
-                    <span className="ml-4 font-display italic text-subtle text-lg md:text-xl">
+                    <span className="ml-3 italic text-subtle text-base md:text-lg">
                       {w.titleEn.toLowerCase()}
                     </span>
                   </div>
-                  <div className="hidden md:block md:col-span-3 text-sm text-muted">
-                    {w.tags.join(" · ")}
+                  <div className="text-[11px] uppercase tracking-[0.3em] text-subtle shrink-0">
+                    {w.tags[0]}
                   </div>
-                  <div className="col-span-12 md:col-span-2 text-xs text-subtle md:text-right">
-                    {w.year}
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
+                </div>
+              </Link>
+            </Reveal>
+          ))}
         </div>
       </section>
     </>

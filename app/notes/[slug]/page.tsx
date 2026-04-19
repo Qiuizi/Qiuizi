@@ -42,27 +42,30 @@ export default async function NotePage({
   const prev = all[idx - 1];
 
   return (
-    <article className="px-6 md:px-10 pt-40 pb-32">
-      <div className="max-w-3xl mx-auto">
+    <article className="relative px-6 md:px-10 pt-32 pb-32 overflow-hidden">
+      <div className="blob" style={{ top: "5%", left: "-10%", width: 520, height: 520, background: "#818cf8", opacity: 0.1 }} />
+      <div className="max-w-3xl mx-auto relative z-10">
         <Reveal>
-          <div className="text-sm text-subtle">
-            {meta.date} · {meta.readingMinutes} 分钟
+          <div className="text-[11px] uppercase tracking-[0.4em] text-accent">
+            {meta.date} · {meta.readingMinutes} min read
           </div>
         </Reveal>
         <Reveal delay={0.08}>
-          <h1 className="font-display mt-6 text-balance"
-              style={{
-                fontSize: "clamp(2.25rem, 5.5vw, 4.5rem)",
-                lineHeight: 1.2,
-                letterSpacing: "0",
-              }}>
+          <h1
+            className="font-display mt-8 text-balance"
+            style={{
+              fontSize: "clamp(2.25rem, 6vw, 5rem)",
+              lineHeight: 1.1,
+              letterSpacing: "-0.015em",
+            }}
+          >
             {meta.title}
           </h1>
         </Reveal>
 
         {meta.excerpt && (
           <Reveal delay={0.15}>
-            <p className="mt-8 text-muted font-display italic text-xl md:text-2xl leading-[1.7] border-l border-line pl-6">
+            <p className="mt-10 text-muted font-display italic text-xl md:text-2xl leading-[1.6] border-l border-accent pl-6">
               {meta.excerpt}
             </p>
           </Reveal>
@@ -72,11 +75,13 @@ export default async function NotePage({
           <Content />
         </div>
 
-        <div className="mt-24 pt-10 border-t border-line grid grid-cols-2 gap-6 text-sm">
+        <div className="mt-24 pt-10 border-t border-line grid grid-cols-2 gap-6">
           {prev ? (
             <Link href={`/notes/${prev.slug}`} className="group">
-              <div className="text-xs text-subtle mb-1">下一篇 ↘</div>
-              <div className="font-display text-xl group-hover:text-white transition-colors">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-subtle mb-2">
+                Next ↘
+              </div>
+              <div className="font-display text-xl group-hover:text-accent transition-colors">
                 {prev.title}
               </div>
             </Link>
@@ -85,8 +90,10 @@ export default async function NotePage({
           )}
           {next ? (
             <Link href={`/notes/${next.slug}`} className="group text-right">
-              <div className="text-xs text-subtle mb-1">↖ 上一篇</div>
-              <div className="font-display text-xl group-hover:text-white transition-colors">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-subtle mb-2">
+                ↖ Previous
+              </div>
+              <div className="font-display text-xl group-hover:text-accent transition-colors">
                 {next.title}
               </div>
             </Link>

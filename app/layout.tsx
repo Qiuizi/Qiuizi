@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Instrument_Serif } from "next/font/google";
-// 思源宋体 (Noto Serif SC) —— 用作中文 display 字体。
-// 按 unicode-range 分片，每页只下载实际用到的字符子集。
+import { Playfair_Display, Inter } from "next/font/google";
+// 思源宋体 (Noto Serif SC) —— 中文 display (给 .font-display 兜底).
 import "@fontsource/noto-serif-sc/chinese-simplified-400.css";
 import "@fontsource/noto-serif-sc/chinese-simplified-500.css";
 import "./globals.css";
@@ -9,14 +8,23 @@ import { site } from "@/lib/site";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { Loader } from "@/components/loader";
+import { Cursor } from "@/components/cursor";
 
-// 唯一的 Latin 字体 —— Instrument Serif, italic 极佳。
-// 正文中文走 LXGW 霞鹜文楷屏幕版（<link> 引入）。
-// 三件套: Instrument Serif + Noto Serif SC + LXGW.
-const instrument = Instrument_Serif({
-  variable: "--font-instrument",
+// Playfair Display —— Latin display (italic 极佳).
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Inter —— 现代无衬线正文.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
@@ -34,16 +42,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN" className={instrument.variable}>
-      <head>
-        {/* 自托管霞鹜文楷屏幕阅读版（GB 子集版）—— 97 个 woff2 按 unicode-range 分片，
-            每页实际只下载几个子集，首屏也能用。文件在 /public/fonts/lxgw/ 下。 */}
-        <link
-          rel="stylesheet"
-          href="/fonts/lxgw/lxgwwenkaigbscreen.css"
-        />
-      </head>
+    <html lang="zh-CN" className={`${playfair.variable} ${inter.variable}`}>
       <body className="bg-background text-foreground font-sans">
+        <Loader />
+        <Cursor />
         <SmoothScroll />
         <Nav />
         <main className="relative">{children}</main>

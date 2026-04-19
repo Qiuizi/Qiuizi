@@ -1,22 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #050505;
-  --color-foreground: #ededed;
-  --color-muted: #a8a29e;
-  --color-subtle: #57534e;
-  --color-line: #1c1917;
-  --color-accent: #e7e5e4;
+  /* zinc-950 基底 + indigo 点缀 —— 与 demo 对齐 */
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+  --color-line: #27272a;
+  --color-panel: #18181b;
+  --color-accent: #818cf8;
 
-  /* 字体只有三件：Instrument Serif (Latin display) + Noto Serif SC (中文 display) +
-     LXGW 霞鹜文楷屏幕版 (正文)。mono 落到系统等宽。 */
-  --font-sans: "LXGW WenKai Screen", var(--font-instrument), ui-sans-serif,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-    "Microsoft YaHei UI", sans-serif;
-  --font-display: var(--font-instrument), "Noto Serif SC", "Songti SC",
-    "STSong", ui-serif, Georgia, serif;
-  --font-chinese: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei UI",
-    sans-serif;
+  /* 字体：Playfair (Latin display) + Inter (正文) + Noto Serif SC (中文 display 兜底) */
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-display: var(--font-playfair), "Noto Serif SC", "Songti SC", "STSong",
+    ui-serif, Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -24,9 +22,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* 关键：禁止浏览器把中文字符强行斜切（Windows 下的 SimSun 斜体极丑）。
-     开启后 font-style: italic 只影响真正有 italic 字形的 Latin 字体，
-     中文保持正体。 */
+  /* 禁止浏览器把中文字符强行斜切 (Windows SimSun 斜体极丑)。
+     italic 只影响真正有 italic 字形的 Latin 字体，中文保持正体。 */
   font-synthesis-style: none;
 }
 
@@ -38,10 +35,22 @@ html {
 
 body {
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
   overflow-x: hidden;
-  /* 中英文混排行距要比纯英文松一点，否则会显得挤。 */
-  line-height: 1.85;
+  line-height: 1.7;
+  /* 自定义光标隐掉系统光标 (触屏设备回退) */
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea {
+    cursor: none;
+  }
 }
 
 /* Lenis smooth scroll */
@@ -61,8 +70,8 @@ html.lenis body {
 
 /* Selection */
 ::selection {
-  background: #ededed;
-  color: #050505;
+  background: var(--color-accent);
+  color: #09090b;
 }
 
 /* Hide scrollbar for horizontal gallery */
@@ -74,7 +83,7 @@ html.lenis body {
   scrollbar-width: none;
 }
 
-/* Custom scrollbar for main */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -83,18 +92,14 @@ html.lenis body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #292524;
+  background: #3f3f46;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #44403c;
+  background: #52525b;
 }
 
-/* Chinese display refinement
-   · palt 开启比例宽度（中文 display 下字间距更顺）
-   · font-weight: 500 让思源宋体在 display 尺寸下有足够骨架
-   · 内部的 .italic（Latin accent）回落到 400，避免 Instrument Serif 合成粗体 */
-.font-display:lang(zh),
+/* Chinese display refinement —— 思源宋体 display 尺寸下开 palt 更顺 */
 .font-display {
   font-feature-settings: "palt";
   font-weight: 500;
@@ -104,12 +109,28 @@ html.lenis body {
   font-weight: 400;
 }
 
-/* Utility: text balance for headlines */
+/* Utility */
 .text-balance {
   text-wrap: balance;
 }
 
-/* Reveal fade-up */
+/* Glass nav —— 毛玻璃顶栏 */
+.glass-nav {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(9, 9, 11, 0.6);
+}
+
+/* Blurred color blobs —— 背景氛围光 */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

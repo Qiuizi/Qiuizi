@@ -6,85 +6,86 @@ import { motion } from "motion/react";
 import type { Work } from "@/data/works";
 import { Reveal } from "./reveal";
 
+// 精选作品 —— 横向滚动条，rounded-[2rem] 圆角卡片 + caption overlay。
 export function SelectedWorks({ works }: { works: Work[] }) {
   return (
-    <section className="px-6 md:px-10 py-32">
-      <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
-        <Reveal>
-          <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
-            那些值得
-            <br />
-            <span className="italic text-muted">被再看一次</span>的。
-          </h2>
-        </Reveal>
-        <Reveal delay={0.15}>
-          <Link
-            href="/works"
-            className="text-sm underline underline-offset-4 decoration-subtle hover:decoration-foreground transition"
-          >
-            查看全部 →
-          </Link>
-        </Reveal>
+    <section className="py-32 border-t border-line">
+      <div className="px-6 md:px-10 mb-16">
+        <div className="flex items-end justify-between flex-wrap gap-6 max-w-7xl mx-auto">
+          <div>
+            <Reveal>
+              <div className="text-xs tracking-[0.4em] uppercase text-accent mb-5">
+                02 — Selected Works
+              </div>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <h2
+                className="font-display text-balance"
+                style={{
+                  fontSize: "clamp(2.5rem, 6vw, 5rem)",
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.015em",
+                }}
+              >
+                Fragments of <span className="italic text-accent">stillness</span>.
+              </h2>
+            </Reveal>
+          </div>
+          <Reveal delay={0.15}>
+            <Link
+              href="/works"
+              className="text-xs uppercase tracking-[0.3em] text-muted hover:text-accent transition-colors"
+            >
+              View all ↗
+            </Link>
+          </Reveal>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
-        {works.map((w, i) => {
-          const span =
-            i % 4 === 0
-              ? "md:col-span-7"
-              : i % 4 === 1
-              ? "md:col-span-5"
-              : i % 4 === 2
-              ? "md:col-span-5"
-              : "md:col-span-7";
-          const tall = i % 3 === 0;
-          return (
-            <Reveal key={w.slug} delay={(i % 2) * 0.1} className={span}>
-              <WorkCard work={w} aspect={tall ? "tall" : "wide"} />
+      <div className="no-scrollbar overflow-x-auto">
+        <div className="flex gap-6 md:gap-8 px-6 md:px-10 pb-2">
+          {works.map((w, i) => (
+            <Reveal key={w.slug} delay={i * 0.06}>
+              <WorkCard work={w} index={i} />
             </Reveal>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-function WorkCard({
-  work,
-  aspect,
-}: {
-  work: Work;
-  aspect: "tall" | "wide";
-}) {
+function WorkCard({ work, index }: { work: Work; index: number }) {
   return (
-    <Link href={`/works/${work.slug}`} className="group block">
+    <Link href={`/works/${work.slug}`} className="group block shrink-0">
       <motion.div
-        whileHover={{ scale: 1.005 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative overflow-hidden bg-line ${
-          aspect === "tall" ? "aspect-[4/5]" : "aspect-[16/10]"
-        }`}
+        whileHover={{ y: -6 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-[78vw] sm:w-[60vw] md:w-[36rem] aspect-[4/5] rounded-[2rem] overflow-hidden bg-panel"
       >
         <Image
           src={work.cover}
           alt={work.coverAlt}
           fill
-          className="object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover transition-transform duration-[1.4s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+          sizes="(max-width: 768px) 78vw, 36rem"
           unoptimized
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <div className="absolute left-0 right-0 bottom-0 p-7">
+          <div className="flex items-baseline justify-between gap-4">
+            <div className="font-display text-white text-2xl md:text-3xl leading-tight">
+              {work.title}
+              <div className="italic text-white/60 text-sm md:text-base mt-1">
+                {work.titleEn.toLowerCase()}
+              </div>
+            </div>
+            <div className="text-[11px] tracking-[0.3em] uppercase text-white/70 tabular-nums shrink-0">
+              {String(index + 1).padStart(2, "0")}
+            </div>
+          </div>
+        </div>
       </motion.div>
-      <div className="mt-5 flex items-baseline justify-between gap-4">
-        <div className="font-display text-xl md:text-2xl group-hover:text-white transition-colors">
-          {work.title}
-          <span className="ml-3 italic text-subtle text-base">
-            {work.titleEn.toLowerCase()}
-          </span>
-        </div>
-        <div className="text-sm text-subtle shrink-0 tabular-nums">
-          {work.year}
-        </div>
-      </div>
     </Link>
   );
 }

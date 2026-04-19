@@ -10,32 +10,38 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <section className="px-6 md:px-10 pt-48 pb-24">
-        <div className="max-w-5xl">
+      <section className="relative px-6 md:px-10 pt-40 pb-24 overflow-hidden">
+        <div className="blob" style={{ top: "0%", right: "-10%", width: 560, height: 560, background: "#818cf8", opacity: 0.12 }} />
+        <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
+            <div className="text-xs tracking-[0.4em] uppercase text-accent mb-6">
+              About · Colophon
+            </div>
+          </Reveal>
+          <Reveal delay={0.08}>
             <h1
               className="font-display text-balance"
               style={{
-                fontSize: "clamp(2.75rem, 9vw, 8rem)",
-                lineHeight: 1.1,
-                letterSpacing: "0",
+                fontSize: "clamp(2.75rem, 10vw, 9rem)",
+                lineHeight: 1.02,
+                letterSpacing: "-0.02em",
               }}
             >
-              我是
-              <span className="italic text-muted">{site.name}</span>。
+              Hi, I&rsquo;m{" "}
+              <span className="italic text-accent">{site.nameLatin.toLowerCase()}</span>.
             </h1>
           </Reveal>
         </div>
       </section>
 
       <section className="px-6 md:px-10 pb-32">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-14">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16">
           <div className="md:col-span-5">
             <Reveal>
-              <div className="relative aspect-[4/5] bg-line overflow-hidden">
+              <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-panel">
                 <Image
                   src="/api/placeholder?seed=sp-about&w=1200&h=1500"
-                  alt="肖像占位"
+                  alt="portrait placeholder"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 40vw"
@@ -47,13 +53,20 @@ export default function AboutPage() {
 
           <div className="md:col-span-7 space-y-12">
             <Reveal>
-              <p className="font-display text-3xl md:text-[2.2rem] leading-[1.55] text-balance">
+              <p
+                className="font-display text-balance"
+                style={{
+                  fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)",
+                  lineHeight: 1.35,
+                  letterSpacing: "-0.01em",
+                }}
+              >
                 {site.bio}
               </p>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <div className="space-y-6 text-stone-300 leading-[2]">
+              <div className="space-y-6 text-muted leading-[2] max-w-xl">
                 <p>
                   这里是一段关于你自己的介绍占位文字。你可以写你是谁、你在做什么、
                   你为什么做这些事。不用追求完整或者华丽——真诚比什么都重要。
@@ -73,7 +86,12 @@ export default function AboutPage() {
       </section>
 
       <section className="px-6 md:px-10 py-24 border-t border-line">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <div className="text-xs tracking-[0.4em] uppercase text-accent mb-12">
+              Timeline
+            </div>
+          </Reveal>
           <ul className="divide-y divide-line border-y border-line">
             {[
               { year: "2026", text: "一件你在做的事（占位）" },
@@ -83,10 +101,10 @@ export default function AboutPage() {
             ].map((item, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <li className="grid grid-cols-12 gap-6 py-8 items-baseline">
-                  <div className="col-span-3 md:col-span-2 text-sm text-subtle tabular-nums">
+                  <div className="col-span-3 md:col-span-2 text-[11px] uppercase tracking-[0.3em] text-accent tabular-nums">
                     {item.year}
                   </div>
-                  <div className="col-span-9 md:col-span-10 font-display text-xl md:text-2xl leading-[1.5] text-stone-200">
+                  <div className="col-span-9 md:col-span-10 font-display text-xl md:text-2xl leading-[1.5]">
                     {item.text}
                   </div>
                 </li>

@@ -2,45 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
+// 顶栏：毛玻璃 + Playfair italic logo + uppercase tracking-widest 菜单。demo 风。
 export function Nav() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => setOpen(false), [pathname]);
+  const close = () => setOpen(false);
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-          scrolled
-            ? "backdrop-blur-md bg-black/30 border-b border-white/5"
-            : "bg-transparent"
-        )}
-        style={{ mixBlendMode: "normal" }}
-      >
+      <header className="glass-nav fixed inset-x-0 top-0 z-50 border-b border-line/60">
         <div className="flex items-center justify-between px-6 md:px-10 h-16">
           <Link
             href="/"
-            className="font-display italic text-xl hover:opacity-70 transition-opacity"
+            className="font-display italic text-xl leading-none hover:text-accent transition-colors"
           >
             {site.nameLatin.toLowerCase()}
           </Link>
 
-          <nav className="hidden md:flex items-center gap-10 text-sm">
+          <nav className="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[0.3em]">
             {site.nav.map((item) => {
               const active =
                 item.href === "/"
@@ -55,16 +39,14 @@ export function Nav() {
                     active ? "text-foreground" : "text-muted hover:text-foreground"
                   )}
                 >
-                  <span className="relative">
-                    {item.label}
-                    {active && (
-                      <motion.span
-                        layoutId="nav-underline"
-                        className="absolute -bottom-1 left-0 right-0 h-px bg-foreground"
-                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                      />
-                    )}
-                  </span>
+                  {item.labelEn}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute -bottom-1 left-0 right-0 h-px bg-accent"
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    />
+                  )}
                 </Link>
               );
             })}
@@ -115,9 +97,13 @@ export function Nav() {
                 >
                   <Link
                     href={item.href}
+                    onClick={close}
                     className="font-display text-4xl"
                   >
                     {item.label}
+                    <span className="block text-sm italic text-muted mt-1 text-center">
+                      {item.labelEn.toLowerCase()}
+                    </span>
                   </Link>
                 </motion.div>
               ))}
