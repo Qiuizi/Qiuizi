@@ -49,88 +49,41 @@ export default async function WorkPage({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         <div className="absolute inset-x-0 bottom-0 px-6 md:px-10 pb-20 md:pb-24">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-6 text-xs font-mono tracking-widest text-white/80 mb-6">
-              <span>N° {String(idx + 1).padStart(3, "0")}</span>
-              <span>·</span>
-              <span>{work.year}</span>
-              <span>·</span>
-              <span>{work.location}</span>
-            </div>
+          <div className="max-w-6xl mx-auto">
             <h1
               className="font-display text-white text-balance"
               style={{
-                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                fontSize: "clamp(2.75rem, 9vw, 8rem)",
                 lineHeight: 1.1,
                 letterSpacing: "0",
               }}
             >
               {work.title}
+              <span className="ml-4 font-display italic text-white/50 text-2xl md:text-4xl align-baseline">
+                {work.titleEn.toLowerCase()}
+              </span>
             </h1>
-            <div className="mt-4 font-display italic text-white/60 text-2xl md:text-4xl">
-              {work.titleEn}
-            </div>
           </div>
         </div>
       </section>
 
       {/* 叙述部分 */}
       <section className="px-6 md:px-10 py-32">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10">
-          <div className="md:col-span-3">
-            <div className="sticky top-28">
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-4">
-                Info
-              </div>
-              <dl className="text-sm space-y-3">
-                <div>
-                  <dt className="text-subtle">媒介</dt>
-                  <dd className="mt-0.5">
-                    {work.kind === "photo"
-                      ? "影像"
-                      : work.kind === "video"
-                      ? "视频"
-                      : "文字"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-subtle">年份</dt>
-                  <dd className="mt-0.5">{work.year}</dd>
-                </div>
-                <div>
-                  <dt className="text-subtle">地点</dt>
-                  <dd className="mt-0.5">{work.location}</dd>
-                </div>
-                <div>
-                  <dt className="text-subtle">标签</dt>
-                  <dd className="mt-0.5 flex flex-wrap gap-1.5">
-                    {work.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2 py-0.5 border border-line text-xs"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              </dl>
-            </div>
+        <div className="max-w-3xl mx-auto">
+          <div className="text-sm text-subtle mb-12 tabular-nums">
+            {work.year} · {work.location}
           </div>
-
-          <div className="md:col-span-9">
-            <Reveal>
-              <p className="font-display text-2xl md:text-3xl leading-[1.6] text-balance">
-                {work.summary}
-              </p>
-            </Reveal>
-            <div className="mt-12 space-y-7">
-              {work.body.map((p, i) => (
-                <Reveal key={i} delay={i * 0.05}>
-                  <p className="text-stone-300 leading-[2]">{p}</p>
-                </Reveal>
-              ))}
-            </div>
+          <Reveal>
+            <p className="font-display text-2xl md:text-[2rem] leading-[1.55] text-balance">
+              {work.summary}
+            </p>
+          </Reveal>
+          <div className="mt-16 space-y-7">
+            {work.body.map((p, i) => (
+              <Reveal key={i} delay={i * 0.05}>
+                <p className="text-stone-300 leading-[2]">{p}</p>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -152,8 +105,8 @@ export default async function WorkPage({
                   />
                 </div>
                 {item.caption && (
-                  <figcaption className="mt-3 text-xs font-mono text-subtle tracking-wide">
-                    {String(i + 1).padStart(2, "0")} · {item.caption}
+                  <figcaption className="mt-4 text-sm text-subtle italic">
+                    {item.caption}
                   </figcaption>
                 )}
               </figure>

@@ -1,131 +1,43 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
-import Image from "next/image";
-import { useRef } from "react";
+import { motion } from "motion/react";
 import { site } from "@/lib/site";
 
-// 首页 Hero：滚动驱动的全屏视差 + 文字遮罩揭示
-// 领导想替换成视频：把 Image 换成 <video src="/hero.mp4" autoPlay muted loop playsInline />
+// 首页 Hero —— 纯排版，无装饰。
+// 整屏中文大字 + 一行 Latin 斜体署名。图片、vignette、meta 标签、"向下滚动" 全部砍掉。
 export function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-
-  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.15]);
-  const titleY = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
-  const overlay = useTransform(scrollYProgress, [0, 1], [0.35, 0.85]);
-
   return (
-    <section
-      ref={ref}
-      className="relative h-[100svh] w-full overflow-hidden vignette"
-    >
-      <motion.div
-        style={{ y: imageY, scale: imageScale }}
-        className="absolute inset-0 will-change-transform"
-      >
-        <Image
-          src="/api/placeholder?seed=sp-hero&w=2400&h=1600"
-          alt=""
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-          unoptimized
-        />
-      </motion.div>
+    <section className="relative min-h-[100svh] w-full flex items-end">
+      <div className="px-6 md:px-10 pb-16 md:pb-24 pt-40 w-full">
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="font-display text-balance"
+          style={{
+            fontSize: "clamp(3.25rem, 13vw, 13rem)",
+            lineHeight: 1.04,
+            letterSpacing: "0",
+          }}
+        >
+          <Line delay={0.1}>{site.tagline}。</Line>
+        </motion.h1>
 
-      <motion.div
-        style={{ opacity: overlay }}
-        className="absolute inset-0 bg-background"
-      />
-
-      <motion.div
-        style={{ y: titleY }}
-        className="relative z-10 h-full flex flex-col justify-between px-6 md:px-10 py-24 md:py-28"
-      >
-        <div className="flex items-start justify-between">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="text-xs uppercase tracking-[0.3em] text-muted font-mono"
-          >
-            Portfolio · 2020 — 2026
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-xs uppercase tracking-[0.3em] text-muted font-mono text-right"
-          >
-            {site.location}
-          </motion.div>
-        </div>
-
-        <div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="font-display italic text-muted mb-6 md:mb-8"
-            style={{ fontSize: "clamp(1.25rem, 2.4vw, 2.25rem)" }}
-          >
-            — {site.nameLatin.toLowerCase()}
-          </motion.div>
-
-          <motion.h1
-            className="font-display"
-            style={{
-              fontSize: "clamp(3rem, 10.5vw, 9.5rem)",
-              lineHeight: 1.08,
-              letterSpacing: "0",
-            }}
-          >
-            <TextReveal delay={0.3}>{site.name}</TextReveal>
-            <span className="block italic text-muted">
-              <TextReveal delay={0.55}>的空间</TextReveal>
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.9 }}
-            className="mt-12 max-w-md text-muted leading-[1.9] text-balance"
-          >
-            {site.tagline}。{site.bio}
-          </motion.p>
-        </div>
-
-        <div className="flex items-end justify-between">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.1 }}
-            className="text-xs font-mono tracking-widest text-subtle"
-          >
-            向下滚动 ↓
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.1 }}
-            className="text-xs font-mono tracking-widest text-subtle"
-          >
-            N° 001
-          </motion.div>
-        </div>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.9 }}
+          className="mt-12 md:mt-16 font-display italic text-muted"
+          style={{ fontSize: "clamp(1rem, 1.6vw, 1.5rem)" }}
+        >
+          — {site.nameLatin.toLowerCase()}
+        </motion.div>
+      </div>
     </section>
   );
 }
 
-function TextReveal({
+function Line({
   children,
   delay = 0,
 }: {

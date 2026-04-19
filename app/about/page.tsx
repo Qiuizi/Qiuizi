@@ -10,18 +10,13 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <section className="px-6 md:px-10 pt-40 pb-16">
-        <div className="max-w-6xl mx-auto">
+      <section className="px-6 md:px-10 pt-48 pb-24">
+        <div className="max-w-5xl">
           <Reveal>
-            <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-6">
-              About · 关于
-            </div>
-          </Reveal>
-          <Reveal delay={0.1}>
             <h1
               className="font-display text-balance"
               style={{
-                fontSize: "clamp(2.75rem, 9vw, 8.5rem)",
+                fontSize: "clamp(2.75rem, 9vw, 8rem)",
                 lineHeight: 1.1,
                 letterSpacing: "0",
               }}
@@ -33,8 +28,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="px-6 md:px-10 pb-24">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
+      <section className="px-6 md:px-10 pb-32">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-14">
           <div className="md:col-span-5">
             <Reveal>
               <div className="relative aspect-[4/5] bg-line overflow-hidden">
@@ -47,15 +42,12 @@ export default function AboutPage() {
                   unoptimized
                 />
               </div>
-              <div className="mt-3 text-xs font-mono text-subtle">
-                * 肖像占位中，领导你换成自己的。
-              </div>
             </Reveal>
           </div>
 
-          <div className="md:col-span-7 space-y-10">
+          <div className="md:col-span-7 space-y-12">
             <Reveal>
-              <p className="font-display text-3xl md:text-4xl leading-[1.5] text-balance">
+              <p className="font-display text-3xl md:text-[2.2rem] leading-[1.55] text-balance">
                 {site.bio}
               </p>
             </Reveal>
@@ -80,63 +72,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="px-6 md:px-10 py-20 border-t border-line">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-          <Reveal>
-            <div>
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-3">
-                现在
-              </div>
-              <p className="text-sm text-stone-300 leading-[1.9]">
-                在{site.location}。
-                这里写一两句你当下在做的事——不必很"重要"，
-                但最好是真的。
-              </p>
-            </div>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <div>
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-3">
-                工具
-              </div>
-              <ul className="text-sm text-stone-300 space-y-2 leading-[1.8]">
-                <li>相机 · 占位</li>
-                <li>胶片机 · 占位</li>
-                <li>视频设备 · 占位</li>
-                <li>笔记软件 · 占位</li>
-                <li>剪辑软件 · 占位</li>
-              </ul>
-            </div>
-          </Reveal>
-          <Reveal delay={0.16}>
-            <div>
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-3">
-                联系
-              </div>
-              <ul className="text-sm space-y-2">
-                {site.socials.map((s) => (
-                  <li key={s.label}>
-                    <a
-                      href={s.href}
-                      className="underline underline-offset-4 decoration-subtle hover:decoration-foreground transition"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {s.label} ↗
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="px-6 md:px-10 py-20 border-t border-line">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-8">
-            简历 · Timeline
-          </div>
+      <section className="px-6 md:px-10 py-24 border-t border-line">
+        <div className="max-w-5xl mx-auto">
           <ul className="divide-y divide-line border-y border-line">
             {[
               { year: "2026", text: "一件你在做的事（占位）" },
@@ -145,11 +82,11 @@ export default function AboutPage() {
               { year: "2023", text: "更早的一件事（占位）" },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 0.05}>
-                <li className="grid grid-cols-12 gap-4 py-6 items-baseline">
-                  <div className="col-span-3 md:col-span-2 text-sm font-mono text-muted">
+                <li className="grid grid-cols-12 gap-6 py-8 items-baseline">
+                  <div className="col-span-3 md:col-span-2 text-sm text-subtle tabular-nums">
                     {item.year}
                   </div>
-                  <div className="col-span-9 md:col-span-10 text-stone-200">
+                  <div className="col-span-9 md:col-span-10 font-display text-xl md:text-2xl leading-[1.5] text-stone-200">
                     {item.text}
                   </div>
                 </li>

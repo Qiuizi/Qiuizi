@@ -32,7 +32,7 @@ export function HorizontalGallery({ works }: { works: Work[] }) {
           style={{ x }}
           className="flex gap-10 pl-[8vw] will-change-transform"
         >
-          {works.map((w, i) => (
+          {works.map((w) => (
             <Link
               key={w.slug}
               href={`/works/${w.slug}`}
@@ -47,26 +47,16 @@ export function HorizontalGallery({ works }: { works: Work[] }) {
                   sizes="(max-width: 768px) 70vw, 48vw"
                   unoptimized
                 />
-                <div className="absolute top-5 left-5 right-5 flex items-start justify-between">
-                  <span className="text-xs font-mono tracking-widest text-white/80">
-                    N° {String(i + 1).padStart(3, "0")}
-                  </span>
-                  <span className="text-xs font-mono tracking-widest text-white/80">
-                    {w.year}
-                  </span>
-                </div>
               </div>
-              <div className="mt-5 flex items-baseline justify-between gap-6">
-                <div>
-                  <div className="font-display text-3xl md:text-4xl leading-[1.3] group-hover:text-white transition-colors">
-                    {w.title}
-                  </div>
-                  <div className="text-xs font-mono tracking-widest text-subtle mt-1.5">
-                    {w.titleEn.toUpperCase()} · {w.location}
-                  </div>
+              <div className="mt-6 flex items-baseline justify-between gap-6">
+                <div className="font-display text-2xl md:text-3xl leading-[1.3] group-hover:text-white transition-colors">
+                  {w.title}
+                  <span className="ml-3 italic text-subtle text-base md:text-lg">
+                    {w.titleEn.toLowerCase()}
+                  </span>
                 </div>
-                <div className="text-xs font-mono text-muted shrink-0 underline underline-offset-4 decoration-subtle group-hover:decoration-foreground transition">
-                  进入 →
+                <div className="text-sm text-subtle shrink-0 tabular-nums">
+                  {w.year}
                 </div>
               </div>
             </Link>

@@ -1,6 +1,5 @@
 import { Hero } from "@/components/hero";
 import { SelectedWorks } from "@/components/selected-works";
-import { Marquee } from "@/components/marquee";
 import { Reveal } from "@/components/reveal";
 import { works } from "@/data/works";
 import { getAllNotes } from "@/lib/notes";
@@ -15,66 +14,35 @@ export default async function Home() {
     <>
       <Hero />
 
-      {/* 简短引子 */}
-      <section className="px-6 md:px-10 pt-32 pb-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-            <div className="md:col-span-3">
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono">
-                Introduction
-              </div>
-              <div className="mt-3 text-sm text-muted font-mono">§ 00</div>
-            </div>
-            <div className="md:col-span-9">
-              <Reveal>
-                <p className="font-display text-3xl md:text-[2.4rem] leading-[1.55] text-balance">
-                  {site.tagline}。{site.bio}
-                  <span className="block mt-4 text-subtle italic">
-                    Welcome — feel free to wander.
-                  </span>
-                </p>
-              </Reveal>
-            </div>
-          </div>
+      {/* 引子：单列，无装饰 */}
+      <section className="px-6 md:px-10 pt-40 pb-24">
+        <div className="max-w-3xl">
+          <Reveal>
+            <p className="font-display text-2xl md:text-[1.9rem] leading-[1.7] text-balance">
+              {site.bio}
+            </p>
+          </Reveal>
         </div>
       </section>
-
-      <Marquee
-        items={[
-          "影像",
-          "Photography",
-          "随笔",
-          "Notes",
-          "地理",
-          "Geography",
-          "私人",
-          "Personal",
-        ]}
-      />
 
       <SelectedWorks works={featured} />
 
       {/* 最近的随笔 */}
       <section className="px-6 md:px-10 py-32 border-t border-line">
-        <div className="flex items-end justify-between mb-14 flex-wrap gap-6">
+        <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
           <Reveal>
-            <div>
-              <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-4">
-                Recent Notes · 随笔
-              </div>
-              <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
-                写下来的
-                <br />
-                <span className="italic text-muted">一点点想法。</span>
-              </h2>
-            </div>
+            <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
+              写下来的
+              <br />
+              <span className="italic text-muted">一点点想法。</span>
+            </h2>
           </Reveal>
           <Reveal delay={0.15}>
             <Link
               href="/notes"
               className="text-sm underline underline-offset-4 decoration-subtle hover:decoration-foreground transition"
             >
-              查看全部随笔 →
+              查看全部 →
             </Link>
           </Reveal>
         </div>
@@ -85,18 +53,15 @@ export default async function Home() {
               <li>
                 <Link
                   href={`/notes/${n.slug}`}
-                  className="group grid grid-cols-12 gap-4 py-8 items-baseline hover:bg-white/[0.015] transition-colors px-2 -mx-2"
+                  className="group grid grid-cols-12 gap-6 py-10 items-baseline hover:bg-white/[0.015] transition-colors px-2 -mx-2"
                 >
-                  <div className="col-span-2 md:col-span-1 text-xs font-mono text-subtle">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                  <div className="col-span-10 md:col-span-7 font-display text-2xl md:text-3xl leading-[1.35] group-hover:text-white transition-colors">
+                  <div className="col-span-12 md:col-span-8 font-display text-2xl md:text-3xl leading-[1.35] group-hover:text-white transition-colors">
                     {n.title}
                   </div>
                   <div className="hidden md:block md:col-span-3 text-sm text-muted truncate">
                     {n.excerpt}
                   </div>
-                  <div className="col-span-12 md:col-span-1 text-xs font-mono text-subtle md:text-right">
+                  <div className="col-span-12 md:col-span-1 text-xs text-subtle md:text-right">
                     {n.date}
                   </div>
                 </Link>

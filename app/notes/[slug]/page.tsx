@@ -45,8 +45,8 @@ export default async function NotePage({
     <article className="px-6 md:px-10 pt-40 pb-32">
       <div className="max-w-3xl mx-auto">
         <Reveal>
-          <div className="text-xs font-mono text-subtle tracking-widest">
-            {meta.date} · {meta.readingMinutes} 分钟阅读
+          <div className="text-sm text-subtle">
+            {meta.date} · {meta.readingMinutes} 分钟
           </div>
         </Reveal>
         <Reveal delay={0.08}>

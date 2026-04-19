@@ -35,12 +35,9 @@ export function Nav() {
         <div className="flex items-center justify-between px-6 md:px-10 h-16">
           <Link
             href="/"
-            className="font-display text-lg hover:opacity-70 transition-opacity"
+            className="font-display italic text-xl hover:opacity-70 transition-opacity"
           >
-            {site.name}
-            <span className="ml-2 text-xs font-sans text-muted tracking-[0.2em]">
-              {site.nameLatin}
-            </span>
+            {site.nameLatin.toLowerCase()}
           </Link>
 
           <nav className="hidden md:flex items-center gap-10 text-sm">
@@ -121,9 +118,6 @@ export function Nav() {
                     className="font-display text-4xl"
                   >
                     {item.label}
-                    <span className="ml-3 text-sm font-sans text-muted align-middle">
-                      {item.labelEn}
-                    </span>
                   </Link>
                 </motion.div>
               ))}

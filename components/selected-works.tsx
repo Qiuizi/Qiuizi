@@ -11,23 +11,18 @@ export function SelectedWorks({ works }: { works: Work[] }) {
     <section className="px-6 md:px-10 py-32">
       <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
         <Reveal>
-          <div>
-            <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-4">
-              Selected Works · 精选
-            </div>
-            <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
-              那些值得
-              <br />
-              <span className="italic text-muted">被再看一次</span>的。
-            </h2>
-          </div>
+          <h2 className="font-display text-4xl md:text-6xl leading-[1.15] text-balance">
+            那些值得
+            <br />
+            <span className="italic text-muted">被再看一次</span>的。
+          </h2>
         </Reveal>
         <Reveal delay={0.15}>
           <Link
             href="/works"
             className="text-sm underline underline-offset-4 decoration-subtle hover:decoration-foreground transition"
           >
-            查看全部作品 →
+            查看全部 →
           </Link>
         </Reveal>
       </div>
@@ -78,23 +73,15 @@ function WorkCard({
           sizes="(max-width: 768px) 100vw, 50vw"
           unoptimized
         />
-        <div className="absolute inset-x-0 bottom-0 p-5 md:p-6 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div className="text-xs font-mono uppercase tracking-widest text-muted">
-            {work.kind === "photo" ? "影像" : work.kind === "video" ? "视频" : "文字"} ·{" "}
-            {work.year}
-          </div>
-        </div>
       </motion.div>
-      <div className="mt-4 flex items-baseline justify-between gap-4">
-        <div>
-          <div className="font-display text-2xl group-hover:text-white transition-colors">
-            {work.title}
-          </div>
-          <div className="text-xs font-mono tracking-widest text-subtle mt-1">
-            {work.titleEn.toUpperCase()}
-          </div>
+      <div className="mt-5 flex items-baseline justify-between gap-4">
+        <div className="font-display text-xl md:text-2xl group-hover:text-white transition-colors">
+          {work.title}
+          <span className="ml-3 italic text-subtle text-base">
+            {work.titleEn.toLowerCase()}
+          </span>
         </div>
-        <div className="text-xs font-mono text-subtle shrink-0">
+        <div className="text-sm text-subtle shrink-0 tabular-nums">
           {work.year}
         </div>
       </div>
