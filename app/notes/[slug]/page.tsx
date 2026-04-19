@@ -58,7 +58,7 @@ export default async function NotePage({
 
         {meta.excerpt && (
           <Reveal delay={0.15}>
-            <p className="mt-8 text-muted font-display italic text-xl md:text-2xl leading-relaxed border-l border-line pl-6">
+            <p className="mt-8 text-muted font-display italic text-xl md:text-2xl leading-[1.7] border-l border-line pl-6">
               {meta.excerpt}
             </p>
           </Reveal>

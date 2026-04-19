@@ -16,7 +16,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <h3 className="text-xl md:text-2xl font-medium mt-10 mb-3">{children}</h3>
     ),
     p: ({ children }) => (
-      <p className="leading-[1.85] my-5 text-stone-300">{children}</p>
+      <p className="leading-[2] my-6 text-stone-300">{children}</p>
     ),
     a: ({ href, children }) => (
       <a
@@ -33,12 +33,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     hr: () => <hr className="my-16 border-stone-800" />,
     ul: ({ children }) => (
-      <ul className="list-disc marker:text-stone-600 pl-6 my-5 space-y-2">
+      <ul className="list-disc marker:text-stone-600 pl-6 my-6 space-y-3 leading-[1.9] text-stone-300">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="list-decimal marker:text-stone-600 pl-6 my-5 space-y-2">
+      <ol className="list-decimal marker:text-stone-600 pl-6 my-6 space-y-3 leading-[1.9] text-stone-300">
         {children}
       </ol>
     ),

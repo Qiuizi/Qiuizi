@@ -4,6 +4,7 @@ import { Marquee } from "@/components/marquee";
 import { Reveal } from "@/components/reveal";
 import { works } from "@/data/works";
 import { getAllNotes } from "@/lib/notes";
+import { site } from "@/lib/site";
 import Link from "next/link";
 
 export default async function Home() {
@@ -26,11 +27,10 @@ export default async function Home() {
             </div>
             <div className="md:col-span-9">
               <Reveal>
-                <p className="font-display text-3xl md:text-[2.6rem] leading-[1.35] tracking-tight text-balance">
-                  我是素鹏。我拍一些安静的照片，写一些写给自己看的字。
-                  这个网站是我的仓库，也是我的窗口——
-                  <span className="text-subtle italic">
-                    如果你碰巧进来，请随意停留。
+                <p className="font-display text-3xl md:text-[2.6rem] leading-[1.5] tracking-tight text-balance">
+                  {site.tagline}。{site.bio}
+                  <span className="block mt-4 text-subtle italic">
+                    Welcome — feel free to wander.
                   </span>
                 </p>
               </Reveal>

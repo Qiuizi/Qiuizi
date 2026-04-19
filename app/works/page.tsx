@@ -28,7 +28,7 @@ export default function WorksPage() {
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-10 max-w-xl text-muted leading-relaxed text-lg">
+            <p className="mt-10 max-w-xl text-muted leading-[1.9] text-lg">
               一共 {works.length} 组。它们按时间倒序排列。向下滚动，它们会横着走。
             </p>
           </Reveal>

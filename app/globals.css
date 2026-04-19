@@ -43,6 +43,8 @@ body {
   font-family: var(--font-sans);
   font-feature-settings: "ss01", "cv11";
   overflow-x: hidden;
+  /* 中英文混排行距要比纯英文松一点，否则会显得挤。 */
+  line-height: 1.85;
 }
 
 /* Lenis smooth scroll */

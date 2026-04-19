@@ -116,14 +116,14 @@ export default async function WorkPage({
 
           <div className="md:col-span-9">
             <Reveal>
-              <p className="font-display text-2xl md:text-3xl leading-[1.45] tracking-tight text-balance">
+              <p className="font-display text-2xl md:text-3xl leading-[1.6] tracking-tight text-balance">
                 {work.summary}
               </p>
             </Reveal>
-            <div className="mt-12 space-y-6">
+            <div className="mt-12 space-y-7">
               {work.body.map((p, i) => (
                 <Reveal key={i} delay={i * 0.05}>
-                  <p className="text-stone-300 leading-[1.85]">{p}</p>
+                  <p className="text-stone-300 leading-[2]">{p}</p>
                 </Reveal>
               ))}
             </div>

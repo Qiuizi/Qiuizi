@@ -30,7 +30,7 @@ export default async function NotesIndex() {
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-10 max-w-xl text-muted leading-relaxed text-lg">
+            <p className="mt-10 max-w-xl text-muted leading-[1.9] text-lg">
               这里是一些没在朋友圈发的想法。长短不一，语气不一，但都是认真写的。
             </p>
           </Reveal>
@@ -54,7 +54,7 @@ export default async function NotesIndex() {
                       <div className="font-display text-3xl md:text-4xl tracking-tight group-hover:text-white transition-colors text-balance">
                         {n.title}
                       </div>
-                      <div className="mt-3 text-sm text-muted leading-relaxed">
+                      <div className="mt-3 text-sm text-muted leading-[1.9]">
                         {n.excerpt}
                       </div>
                     </div>

@@ -83,7 +83,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.9 }}
-            className="mt-8 max-w-md text-muted leading-relaxed text-balance"
+            className="mt-8 max-w-md text-muted leading-[1.9] text-balance"
           >
             {site.tagline}。{site.bio}
           </motion.p>

@@ -51,25 +51,24 @@ export default function AboutPage() {
 
           <div className="md:col-span-7 space-y-10">
             <Reveal>
-              <p className="font-display text-3xl md:text-4xl leading-[1.3] tracking-tight text-balance">
+              <p className="font-display text-3xl md:text-4xl leading-[1.5] tracking-tight text-balance">
                 {site.bio}
               </p>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <div className="space-y-5 text-stone-300 leading-[1.9]">
+              <div className="space-y-6 text-stone-300 leading-[2]">
                 <p>
-                  我的本职是一个正在读大二的地理系学生。课余在拍照、写字、
-                  偶尔剪剪片子。我不把这些当作"爱好"——它们和我的专业一起，
-                  构成了我看世界的方式。
+                  这里是一段关于你自己的介绍占位文字。你可以写你是谁、你在做什么、
+                  你为什么做这些事。不用追求完整或者华丽——真诚比什么都重要。
                 </p>
                 <p>
-                  我相信一个人的眼睛比他的观点更诚实。所以我拍照时尽量少说话，
-                  写字时尽量不说理。
+                  第二段可以继续展开：你的兴趣、你看世界的方式、或者任何你愿意
+                  让读者知道的事。也可以写你的日常——光、食物、天气、习惯。
                 </p>
                 <p>
-                  如果你想和我聊聊任何东西——一张让你停下来的照片，一个没有答案的问题，
-                  或者只是想告诉我你也喜欢某个下午的光——请随时写信。
+                  最后可以留一个开口：如果有人看到这里，他们怎么联系你？
+                  一封信、一条消息，或者只是一声问候。
                 </p>
               </div>
             </Reveal>
@@ -84,9 +83,10 @@ export default function AboutPage() {
               <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-3">
                 现在
               </div>
-              <p className="text-sm text-stone-300 leading-relaxed">
-                在{site.location}，华中师大地理系大二。
-                正在做一组关于长江中游河岸形态的个人项目。
+              <p className="text-sm text-stone-300 leading-[1.9]">
+                在{site.location}。
+                这里写一两句你当下在做的事——不必很"重要"，
+                但最好是真的。
               </p>
             </div>
           </Reveal>
@@ -95,12 +95,12 @@ export default function AboutPage() {
               <div className="text-xs uppercase tracking-[0.3em] text-subtle font-mono mb-3">
                 工具
               </div>
-              <ul className="text-sm text-stone-300 space-y-1">
-                <li>Ricoh GR III · 日常</li>
-                <li>Pentax MX · 胶片</li>
-                <li>FUJIFILM X-T30 · 视频</li>
-                <li>obsidian · 笔记</li>
-                <li>DaVinci Resolve · 剪辑</li>
+              <ul className="text-sm text-stone-300 space-y-2 leading-[1.8]">
+                <li>相机 · 占位</li>
+                <li>胶片机 · 占位</li>
+                <li>视频设备 · 占位</li>
+                <li>笔记软件 · 占位</li>
+                <li>剪辑软件 · 占位</li>
               </ul>
             </div>
           </Reveal>
@@ -135,10 +135,10 @@ export default function AboutPage() {
           </div>
           <ul className="divide-y divide-line border-y border-line">
             {[
-              { year: "2026", text: "开始独立影像项目《长江笔记》第二季" },
-              { year: "2025", text: "华中师范大学 · 地理科学学院 · 大二在读" },
-              { year: "2024", text: "个人摄影项目《末班车》" },
-              { year: "2023", text: "考入华中师大" },
+              { year: "2026", text: "一件你在做的事（占位）" },
+              { year: "2025", text: "上一年发生的事（占位）" },
+              { year: "2024", text: "再上一年（占位）" },
+              { year: "2023", text: "更早的一件事（占位）" },
             ].map((item, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <li className="grid grid-cols-12 gap-4 py-6 items-baseline">
