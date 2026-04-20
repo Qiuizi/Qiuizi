@@ -132,7 +132,7 @@ export function PaginatedHome() {
             onClick={handleNavClick}
             className="text-sm tracking-[0.3em] uppercase text-white font-medium"
           >
-            Visual Poetry
+            Qiuizi
           </a>
           <div className="hidden md:flex items-center gap-10 text-[11px] tracking-[0.3em] uppercase text-zinc-400">
             <a href="#" data-target="1" onClick={handleNavClick} className="hover:text-white transition-colors">理念</a>
@@ -159,11 +159,11 @@ export function PaginatedHome() {
               <span className="reveal-fade text-[11px] font-display tracking-[0.5em] text-zinc-500 mb-10">
                 个人数字空间
               </span>
-              <h1 className="reveal-fade delay-100 text-6xl md:text-8xl lg:text-[10rem] font-display tracking-tight leading-none text-white mb-8">
-                Visual <span className="italic text-zinc-500">Poetry</span>
+              <h1 className="reveal-fade delay-100 text-6xl md:text-8xl lg:text-[10rem] font-display tracking-tight leading-none text-white mb-8 italic">
+                Qiziui
               </h1>
               <p className="reveal-fade delay-200 text-sm md:text-base font-display font-light text-zinc-400 max-w-xl leading-[2.5] tracking-[0.3em] mt-4">
-                捕捉光影与情绪的微妙平衡<br />用镜头与文字寻找片刻宁静
+                一个记录自己的云空间
               </p>
               <a
                 href="#"
@@ -221,7 +221,7 @@ export function PaginatedHome() {
                 </div>
                 <div className="reveal-fade delay-200 mt-16 pt-8 border-t border-white/10 flex items-center gap-16">
                   <div className="flex flex-col gap-1">
-                    <span className="text-3xl font-display text-white tracking-wider">2018</span>
+                    <span className="text-3xl font-display text-white tracking-wider">2025</span>
                     <span className="text-[10px] tracking-widest text-zinc-500 uppercase">创立至今</span>
                   </div>
                   <div className="flex flex-col gap-1">
