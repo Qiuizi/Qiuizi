@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Aurora } from "@/components/aurora";
 import { ExternalLink } from "@/components/external-link";
+import { XiangqiBoard } from "@/components/xiangqi-board";
 import {
   courseNotes,
   dockItems,
@@ -10,7 +11,6 @@ import {
   flagshipOrder,
   homeLayout,
   islandCopy,
-  xiangqiSteps,
   type Geom,
   type IslandMode,
   type WinId,
@@ -31,11 +31,15 @@ type Win = {
 
 const initialWindows: Win[] = [
   { id: "qisland", appName: "Qisland", title: "Qisland — Windows 灵动岛", badge: "v4.3.0 · C#", geom: homeLayout.qisland, z: 14, hidden: false, max: false },
-  { id: "coursedesk", appName: "CourseDesk", title: "CourseDesk / CourseWorkspace", badge: "AI 工作台", geom: homeLayout.coursedesk, z: 12, hidden: false, max: false },
   { id: "deepunpack", appName: "DeepUnpack", title: "DeepUnpack（解到底）", badge: "递归解压", geom: homeLayout.deepunpack, z: 13, hidden: false, max: false },
-  { id: "xiangqi", appName: "XiangqiStudio", title: "XiangqiStudio — 中国象棋工作室", badge: "v1.0.0", geom: homeLayout.xiangqi, z: 15, hidden: false, max: false },
+  { id: "coursedesk", appName: "CourseDesk", title: "CourseDesk / CourseWorkspace", badge: "AI 工作台", geom: homeLayout.coursedesk, z: 12, hidden: false, max: false },
+  { id: "lightskip", appName: "LightSkip", title: "轻跳 · LightSkip — Android 开屏跳过", badge: "v0.2.0 · Android / Java", geom: homeLayout.lightskip, z: 15, hidden: false, max: false },
+  { id: "xiangqi", appName: "XiangqiStudio", title: "XiangqiStudio — 中国象棋工作室", badge: "v1.0.0", geom: homeLayout.xiangqi, z: 16, hidden: true, max: false },
   { id: "finder", appName: "Finder · 更多作品", title: "Finder — 更多在线 Web 与开源作品", badge: "05 — 10", geom: homeLayout.finder, z: 20, hidden: true, max: false },
 ];
+
+const defaultOpen = new Set<WinId>(["qisland", "deepunpack", "coursedesk", "lightskip"]);
+const islandClear = 76;
 
 function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -51,7 +55,6 @@ export function OsDesktop() {
   const [island, setIsland] = useState<IslandMode>("focus");
   const [note, setNote] = useState<1 | 2 | 3>(1);
   const [unpacked, setUnpacked] = useState(false);
-  const [xq, setXq] = useState(0);
   const [dragging, setDragging] = useState<WinId | null>(null);
   const [wallpaperOn, setWallpaperOn] = useState(true);
   const desktopRef = useRef<HTMLDivElement>(null);
@@ -70,7 +73,7 @@ export function OsDesktop() {
     return {
       w,
       x: Math.max(8, Math.min(Math.max(8, b.w - 140), geom.x)),
-      y: Math.max(8, Math.min(Math.max(8, b.h - 72), geom.y)),
+      y: Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), geom.y)),
     };
   }
 
@@ -105,32 +108,12 @@ export function OsDesktop() {
     );
   }
 
-  function tile() {
-    const b = box();
-    const gap = 14;
-    const col = Math.max(260, (b.w - gap * 3) / 2);
-    const row = Math.max(160, (b.h - gap * 3) / 2);
-    const placed: Partial<Record<WinId, Geom>> = {
-      qisland: { x: gap, y: gap, w: col },
-      deepunpack: { x: gap * 2 + col, y: gap, w: col },
-      coursedesk: { x: gap, y: gap * 2 + row, w: col },
-      xiangqi: { x: gap * 2 + col, y: gap * 2 + row, w: col },
-    };
-    setWindows((current) =>
-      current.map((win) => {
-        const geom = placed[win.id];
-        if (!geom) return win;
-        return { ...win, hidden: false, max: false, geom };
-      }),
-    );
-  }
-
   function resetLayout() {
     setWindows((current) =>
       current.map((win) => ({
         ...win,
         max: false,
-        hidden: win.id === "finder",
+        hidden: !defaultOpen.has(win.id),
         geom: clamp(homeLayout[win.id]),
       })),
     );
@@ -198,7 +181,7 @@ export function OsDesktop() {
     const move = (ev: PointerEvent) => {
       const b = box();
       const x = Math.max(8, Math.min(Math.max(8, b.w - 140), origin.x + ev.clientX - startX));
-      const y = Math.max(8, Math.min(Math.max(8, b.h - 72), origin.y + ev.clientY - startY));
+      const y = Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), origin.y + ev.clientY - startY));
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         setWindows((current) => current.map((item) => (item.id === id ? { ...item, geom: { ...item.geom, x, y } } : item)));
@@ -242,9 +225,7 @@ export function OsDesktop() {
     };
   }, []);
 
-  const active = windows.find((win) => win.id === focused);
   const islandView = islandCopy[island];
-  const step = xiangqiSteps[xq];
 
   function cycleIsland() {
     setIsland((mode) => (mode === "focus" ? "media" : mode === "media" ? "alert" : "focus"));
@@ -261,16 +242,14 @@ export function OsDesktop() {
       <header className="menubar">
         <div className="mb-left">
           <span className="mb-brand">◆ Qiuizi OS</span>
-          <span className="mb-active">{active && !active.hidden ? active.appName : "桌面"}</span>
-          <button className="mb-btn mb-btn-wide" type="button" onClick={tile}>
-            整齐平铺
-          </button>
-          <button className="mb-btn mb-btn-wide" type="button" onClick={resetLayout}>
-            恢复桌面布局
+          <button className="mb-btn" type="button" onClick={resetLayout}>
+            重置布局
           </button>
           <button className="mb-btn" type="button" onClick={() => focusWin("finder")}>
-            更多作品 (05–10)
+            更多作品
           </button>
+        </div>
+        <div className="mb-right">
           <button
             className={`mb-btn${wallpaperOn ? " is-on" : ""}`}
             type="button"
@@ -280,11 +259,8 @@ export function OsDesktop() {
           >
             动效
           </button>
-        </div>
-        <div className="mb-right">
-          <span className="mb-hint">拖动任意窗口标题栏 · 点击置顶</span>
           <ExternalLink href={site.github} className="mb-gh">
-            GitHub @{site.name} ↗
+            GitHub ↗
           </ExternalLink>
         </div>
       </header>
@@ -335,18 +311,14 @@ export function OsDesktop() {
               <div className="win-title">{win.title}</div>
               <div className="win-badge">{win.badge}</div>
             </div>
-            <div className="win-body">
+            <div className={`win-body${win.id === "xiangqi" ? " xq-host" : ""}`}>
               {win.id === "qisland" ? (
                 <QislandBody mode={island} onMode={setIsland} />
               ) : null}
               {win.id === "coursedesk" ? <CourseBody note={note} onNote={setNote} /> : null}
               {win.id === "deepunpack" ? <UnpackBody unpacked={unpacked} onToggle={() => setUnpacked((value) => !value)} /> : null}
-              {win.id === "xiangqi" ? (
-                <XiangqiBody
-                  step={step}
-                  onStep={() => setXq((value) => (value + 1) % xiangqiSteps.length)}
-                />
-              ) : null}
+              {win.id === "lightskip" ? <LightSkipBody /> : null}
+              {win.id === "xiangqi" ? <XiangqiBoard onInteract={() => focusWin("xiangqi")} /> : null}
               {win.id === "finder" ? <FinderBody /> : null}
             </div>
           </section>
@@ -457,51 +429,55 @@ function UnpackBody({ unpacked, onToggle }: { unpacked: boolean; onToggle: () =>
   );
 }
 
-function XiangqiBody({
-  step,
-  onStep,
-}: {
-  step: (typeof xiangqiSteps)[number];
-  onStep: () => void;
-}) {
-  const gx = (x: number) => 28 + x * 38;
-  const gy = (y: number) => 22 + y * 38;
-  const pieces = [
-    { x: step.cannon[0], y: step.cannon[1], label: "炮", red: true },
-    { x: step.horse[0], y: step.horse[1], label: "马", red: false },
-    { x: 4, y: 0, label: "将", red: false },
-  ];
+function LightSkipBody() {
+  const [phase, setPhase] = useState<"idle" | "splash" | "skipped">("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const started = useRef(0);
+
+  function trigger() {
+    started.current = performance.now();
+    setPhase("splash");
+  }
+
+  function skip() {
+    setElapsed(Math.max(1, Math.round(performance.now() - started.current)));
+    setPhase("skipped");
+  }
+
   return (
-    <div className="xq-wrap">
-      <div className="xq-board">
-        <svg viewBox="0 0 360 200" role="img" aria-label={step.label}>
-          {Array.from({ length: 5 }, (_, row) => (
-            <line key={`r${row}`} x1="28" y1={gy(row)} x2="332" y2={gy(row)} stroke="rgba(255,220,190,0.22)" />
-          ))}
-          {Array.from({ length: 9 }, (_, col) => (
-            <line key={`c${col}`} x1={gx(col)} y1="22" x2={gx(col)} y2="174" stroke="rgba(255,220,190,0.22)" />
-          ))}
-          <text x="180" y="102" textAnchor="middle" fill="rgba(255,220,190,0.28)" fontSize="11" letterSpacing="8">
-            楚河 · 汉界
-          </text>
-          {pieces.map((piece) => (
-            <g key={piece.label} transform={`translate(${gx(piece.x)} ${gy(piece.y)})`}>
-              <circle r="14" fill={piece.red ? "#45121B" : "#171B24"} stroke={piece.red ? "#FB7185" : "#CBD5E1"} strokeWidth="1.6" />
-              <text y="5" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700">
-                {piece.label}
-              </text>
-            </g>
-          ))}
-        </svg>
+    <>
+      <p className="win-desc">不联网、零第三方依赖的 Android 开屏广告自动跳过工具。零 INTERNET 权限，默认白名单生效，内置 25 套规则与本地录制，并附国产 ROM 保活指引。</p>
+      <div className="ls-badges" aria-label="LightSkip 特性">
+        <span className="ls-pill">零联网</span>
+        <span className="ls-pill">白名单</span>
+        <span className="ls-pill">25 套规则</span>
       </div>
-      <div className="xq-side">
-        <div className="xq-log" aria-live="polite">{step.label}</div>
-        <button type="button" className="w-chip is-on" onClick={onStep}>
-          走下一步
-        </button>
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/XiangqiStudio">GitHub ↗</ExternalLink>
+      <div className="ls-stage" aria-live="polite">
+        {phase === "splash" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">开屏广告</span>
+            <strong>全屏素材</strong>
+            <button type="button" className="w-chip is-on" onClick={skip}>跳过</button>
+          </div>
+        ) : null}
+        {phase === "skipped" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">已跳过</span>
+            <strong className="ls-ms">{elapsed} ms</strong>
+            <button type="button" className="w-chip" onClick={trigger}>再测一次</button>
+          </div>
+        ) : null}
+        {phase === "idle" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">等待开屏</span>
+            <button type="button" className="w-chip is-on" onClick={trigger}>触发开屏测试</button>
+          </div>
+        ) : null}
       </div>
-    </div>
+      <div className="win-actions">
+        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/LightSkip">GitHub 源码 ↗</ExternalLink>
+      </div>
+    </>
   );
 }
 
