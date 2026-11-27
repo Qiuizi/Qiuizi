@@ -250,18 +250,27 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
       target.y = 1 - event.clientY / Math.max(window.innerHeight, 1);
     };
 
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let reduceMotion = motionQuery.matches;
+    const stillTime = 12.4;
+
     const start = () => {
       cancelAnimationFrame(frame);
       if (document.hidden) return;
-      if (!playingRef.current) {
+      if (!playingRef.current || reduceMotion) {
         running = false;
-        draw(seen ? held : flowTime(performance.now()));
+        draw(reduceMotion ? stillTime : seen ? held : flowTime(performance.now()));
         return;
       }
       running = true;
       frame = requestAnimationFrame(loop);
     };
     startRef.current = start;
+
+    const onMotionPreference = () => {
+      reduceMotion = motionQuery.matches;
+      start();
+    };
 
     const stop = () => {
       running = false;
@@ -277,12 +286,14 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", start);
     document.addEventListener("visibilitychange", onVisibility);
+    motionQuery.addEventListener("change", onMotionPreference);
 
     return () => {
       stop();
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("resize", start);
       document.removeEventListener("visibilitychange", onVisibility);
+      motionQuery.removeEventListener("change", onMotionPreference);
     };
   }, []);
 
