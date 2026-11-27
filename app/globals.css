@@ -3,7 +3,7 @@
 :root {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --glass: rgba(14, 18, 30, 0.34);
+  --glass: rgba(8, 12, 22, 0.26);
   --glass-border: rgba(255, 255, 255, 0.34);
   --glass-blur: blur(28px) saturate(185%);
   --ink: #f5f7fc;
@@ -71,7 +71,7 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.055);
+  color: rgba(7, 12, 28, 0.28);
   font-size: clamp(120px, 20vw, 280px);
   font-weight: 800;
   letter-spacing: -0.05em;
@@ -92,7 +92,7 @@ a {
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(8, 12, 20, 0.28);
+  background: rgba(8, 12, 20, 0.22);
   padding: 0 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
   backdrop-filter: var(--glass-blur);
@@ -170,7 +170,7 @@ a {
   gap: 16px;
   border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 999px;
-  background: rgba(4, 6, 12, 0.38);
+  background: rgba(4, 6, 12, 0.3);
   padding: 8px 18px;
   color: #fff;
   box-shadow:
@@ -492,7 +492,7 @@ a {
   gap: 10px;
   border: 1px solid rgba(255, 255, 255, 0.36);
   border-radius: 24px;
-  background: rgba(10, 14, 24, 0.3);
+  background: rgba(10, 14, 24, 0.24);
   padding: 9px 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
