@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   title: site.title,
   description: site.description,
   applicationName: site.name,
-  authors: [{ name: site.person, url: site.github }],
-  creator: site.person,
+  authors: [{ name: site.name, url: site.github }],
+  creator: site.name,
   alternates: { canonical: "/" },
   openGraph: {
     title: site.title,

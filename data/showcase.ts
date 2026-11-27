@@ -21,11 +21,14 @@ export type Flagship = {
   actions: readonly ExternalAction[];
 };
 
+export type WorkKind = "live" | "source";
+
 export type WebWork = {
   name: string;
   description: string;
   href: string;
   action: string;
+  kind: WorkKind;
 };
 
 export const flagships: readonly Flagship[] = [
@@ -136,39 +139,45 @@ export const flagships: readonly Flagship[] = [
 export const webWorks: readonly WebWork[] = [
   {
     name: "SCU Tutor Finder",
-    description: "面向四川大学同学的导师与研究方向快速检索 Web 工具。",
+    description: "高校导师与研究方向检索工具。",
     href: "https://qiuizi.github.io/scu-tutor-finder/",
     action: "在线访问 ↗",
+    kind: "live",
   },
   {
     name: "CloudFitness",
     description: "部署在独立域名的轻量健身记录与训练应用。",
     href: "https://app.cloudfitness.top",
     action: "打开应用 ↗",
+    kind: "live",
   },
   {
     name: "info-station",
     description: "个人信息聚合与动态监控站。",
     href: "https://github.com/Qiuizi/info-station",
     action: "GitHub 源码 ↗",
+    kind: "source",
   },
   {
     name: "fate",
     description: "传统命理文化排盘与辅助解读工具。",
     href: "https://github.com/Qiuizi/fate",
     action: "GitHub 源码 ↗",
+    kind: "source",
   },
   {
     name: "ultimate-tic-tac-toe",
     description: "九宫格嵌套策略棋类——终极井字棋交互实现。",
     href: "https://github.com/Qiuizi/ultimate-tic-tac-toe",
     action: "GitHub 源码 ↗",
+    kind: "source",
   },
   {
     name: "更多开源代码",
     description: "全部仓库、更新记录与发布包统一托管在 GitHub。",
     href: "https://github.com/Qiuizi",
     action: "github.com/Qiuizi ↗",
+    kind: "source",
   },
 ];
 
