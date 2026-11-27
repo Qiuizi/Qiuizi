@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ExternalLink } from "@/components/external-link";
+import { initialPieces, legalMoves, otherSide, playMove, positionStatus, type Piece, type Point, type Side } from "@/lib/xiangqi";
 
-type Side = "red" | "black";
-type Point = { x: number; y: number };
-type Piece = { id: string; side: Side; label: string; x: number; y: number };
+type Snapshot = { pieces: Piece[]; turn: Side };
 
 const FILES = 9;
 const RANKS = 10;
@@ -14,9 +13,6 @@ const PAD = 34;
 const RADIUS = 20;
 const BOARD_W = PAD * 2 + (FILES - 1) * CELL;
 const BOARD_H = PAD * 2 + (RANKS - 1) * CELL;
-const BLACK_BACK = ["车", "马", "象", "士", "将", "士", "象", "马", "车"] as const;
-const RED_BACK = ["车", "马", "相", "仕", "帅", "仕", "相", "马", "车"] as const;
-const PAWN_FILES = [0, 2, 4, 6, 8] as const;
 const STARS: Point[] = [
   { x: 1, y: 2 },
   { x: 7, y: 2 },
@@ -40,27 +36,6 @@ function gx(x: number) {
 
 function gy(y: number) {
   return PAD + y * CELL;
-}
-
-function initialPieces(): Piece[] {
-  const pieces: Piece[] = [];
-  BLACK_BACK.forEach((label, x) => {
-    pieces.push({ id: `black-back-${x}`, side: "black", label, x, y: 0 });
-  });
-  pieces.push({ id: "black-cannon-1", side: "black", label: "炮", x: 1, y: 2 });
-  pieces.push({ id: "black-cannon-7", side: "black", label: "炮", x: 7, y: 2 });
-  PAWN_FILES.forEach((x, index) => {
-    pieces.push({ id: `black-pawn-${index}`, side: "black", label: "卒", x, y: 3 });
-  });
-  RED_BACK.forEach((label, x) => {
-    pieces.push({ id: `red-back-${x}`, side: "red", label, x, y: 9 });
-  });
-  pieces.push({ id: "red-cannon-1", side: "red", label: "炮", x: 1, y: 7 });
-  pieces.push({ id: "red-cannon-7", side: "red", label: "炮", x: 7, y: 7 });
-  PAWN_FILES.forEach((x, index) => {
-    pieces.push({ id: `red-pawn-${index}`, side: "red", label: "兵", x, y: 6 });
-  });
-  return pieces;
 }
 
 function pieceName(piece: Piece) {
@@ -91,14 +66,21 @@ function Star({ x, y }: Point) {
 
 export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
   const [pieces, setPieces] = useState<Piece[]>(initialPieces);
+  const [turn, setTurn] = useState<Side>("red");
   const [selected, setSelected] = useState<string | null>(null);
   const [hover, setHover] = useState<Point | null>(null);
   const [last, setLast] = useState<{ from: Point; to: Point } | null>(null);
-  const [history, setHistory] = useState<Piece[][]>([]);
-  const [status, setStatus] = useState("点选或拖动任意棋子");
+  const [history, setHistory] = useState<Snapshot[]>([]);
+  const [status, setStatus] = useState("红方走棋");
   const [drag, setDrag] = useState<{ id: string; label: string; side: Side; x: number; y: number; size: number } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const dragRef = useRef<{ id: string; x: number; y: number; moved: boolean } | null>(null);
+  const dragRef = useRef<{ id: string; hitId: string; x: number; y: number; moved: boolean } | null>(null);
+  const activeId = drag?.id ?? selected;
+  const targets = useMemo(() => {
+    const piece = pieces.find((item) => item.id === activeId);
+    if (!piece || piece.side !== turn || status.endsWith("胜")) return [];
+    return legalMoves(pieces, piece);
+  }, [activeId, pieces, status, turn]);
 
   function locate(event: { clientX: number; clientY: number }) {
     const svg = svgRef.current;
@@ -117,23 +99,18 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
   }
 
   function applyMove(id: string, to: Point) {
-    const current = pieces;
-    const moving = current.find((piece) => piece.id === id);
-    if (!moving) return;
-    if (moving.x === to.x && moving.y === to.y) {
-      setSelected(id);
-      setStatus(`${pieceName(moving)} · 再点交叉点落子`);
-      return;
-    }
-    const captured = current.find((piece) => piece.id !== id && piece.x === to.x && piece.y === to.y) ?? null;
-    const next = current
-      .filter((piece) => piece.id === id || piece.x !== to.x || piece.y !== to.y)
-      .map((piece) => (piece.id === id ? { ...piece, x: to.x, y: to.y } : piece));
-    setHistory((stack) => [...stack, current]);
+    const moving = pieces.find((piece) => piece.id === id);
+    if (!moving || moving.side !== turn) return;
+    const allowed = legalMoves(pieces, moving);
+    if (!allowed.some((target) => target.x === to.x && target.y === to.y)) return;
+    const next = playMove(pieces, id, to);
+    const nextTurn = otherSide(turn);
+    setHistory((stack) => [...stack, { pieces, turn }]);
     setPieces(next);
+    setTurn(nextTurn);
     setLast({ from: { x: moving.x, y: moving.y }, to });
     setSelected(null);
-    setStatus(captured ? `${pieceName(moving)} 吃 ${pieceName(captured)}` : `${pieceName(moving)} 落到 ${to.x + 1} 路`);
+    setStatus(positionStatus(next, nextTurn));
   }
 
   function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
@@ -145,7 +122,8 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
     svg.setPointerCapture(event.pointerId);
     const point = locate(event);
     const hit = point ? pieces.find((piece) => piece.x === point.x && piece.y === point.y) : undefined;
-    dragRef.current = { id: hit?.id ?? "", x: event.clientX, y: event.clientY, moved: false };
+    const movable = Boolean(hit && hit.side === turn && !status.endsWith("胜"));
+    dragRef.current = { id: movable && hit ? hit.id : "", hitId: hit?.id ?? "", x: event.clientX, y: event.clientY, moved: false };
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
@@ -174,59 +152,52 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
     if (!session) return;
     const point = locate(event);
     if (session.moved && session.id) {
-      if (point) applyMove(session.id, point);
-      else {
-        setSelected(session.id);
-        setStatus("未落在交叉点");
-      }
+      const moving = pieces.find((piece) => piece.id === session.id);
+      const allowed = moving ? legalMoves(pieces, moving) : [];
+      if (point && allowed.some((target) => target.x === point.x && target.y === point.y)) applyMove(session.id, point);
+      else setSelected(session.id);
       setHover(null);
       return;
     }
     if (session.id) {
-      const selectedId = selected;
-      if (selectedId && selectedId !== session.id) {
-        const target = pieces.find((piece) => piece.id === session.id);
-        if (target) applyMove(selectedId, { x: target.x, y: target.y });
-      } else if (selectedId === session.id) {
-        setSelected(null);
-        setStatus("点选或拖动任意棋子");
-      } else {
-        setSelected(session.id);
-        const piece = pieces.find((item) => item.id === session.id);
-        setStatus(piece ? `${pieceName(piece)} · 再点交叉点落子` : "点选或拖动任意棋子");
-      }
+      setSelected(selected === session.id ? null : session.id);
       return;
     }
-    if (selected && point) {
-      applyMove(selected, point);
+    const hit = session.hitId ? pieces.find((piece) => piece.id === session.hitId) : undefined;
+    const destination = hit ? { x: hit.x, y: hit.y } : point;
+    const actor = selected ? pieces.find((piece) => piece.id === selected) : undefined;
+    if (actor && destination && legalMoves(pieces, actor).some((target) => target.x === destination.x && target.y === destination.y)) {
+      applyMove(actor.id, destination);
       setHover(null);
       return;
     }
     setSelected(null);
     setHover(null);
-    setStatus("点选或拖动任意棋子");
   }
 
   function undo() {
     const previous = history[history.length - 1];
     if (!previous) return;
     setHistory((stack) => stack.slice(0, -1));
-    setPieces(previous);
+    setPieces(previous.pieces);
+    setTurn(previous.turn);
     setSelected(null);
     setLast(null);
     setHover(null);
-    setStatus("已悔一步");
+    setStatus(positionStatus(previous.pieces, previous.turn));
   }
 
   function reset() {
+    const opening = initialPieces();
     dragRef.current = null;
-    setPieces(initialPieces());
+    setPieces(opening);
+    setTurn("red");
     setHistory([]);
     setSelected(null);
     setLast(null);
     setHover(null);
     setDrag(null);
-    setStatus("已重摆开局");
+    setStatus("红方走棋");
   }
 
   const riverY = (gy(4) + gy(5)) / 2;
@@ -239,7 +210,7 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
           viewBox={`0 0 ${BOARD_W} ${BOARD_H}`}
           style={{ fontFamily: "var(--font-sans)" }}
           role="application"
-          aria-label="中国象棋棋盘，可自由移动任意棋子"
+          aria-label="中国象棋棋盘，红方先手，按规则走棋"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={finishPointer}
@@ -293,7 +264,24 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
               <circle cx={gx(last.to.x)} cy={gy(last.to.y)} r={RADIUS + 3} fill="rgba(226,190,136,0.13)" stroke="rgba(236,208,160,0.85)" strokeWidth="1.5" />
             </g>
           ) : null}
-          {hover ? (
+          {targets.map((target) => {
+            const occupier = pieces.find((piece) => piece.x === target.x && piece.y === target.y);
+            if (occupier) return null;
+            return (
+              <circle
+                key={`dot-${target.x}-${target.y}`}
+                className="xq-dot"
+                data-x={target.x}
+                data-y={target.y}
+                cx={gx(target.x)}
+                cy={gy(target.y)}
+                r="5.2"
+                fill="rgba(236, 208, 160, 0.92)"
+                pointerEvents="none"
+              />
+            );
+          })}
+          {hover && targets.some((target) => target.x === hover.x && target.y === hover.y) ? (
             <circle cx={gx(hover.x)} cy={gy(hover.y)} r={RADIUS + 2} fill="rgba(226,190,136,0.16)" stroke="rgba(244,214,168,0.9)" strokeWidth="1.4" pointerEvents="none" />
           ) : null}
           {pieces.map((piece) => {
@@ -317,13 +305,16 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
                   {piece.label}
                 </text>
                 {selected === piece.id ? <circle r={RADIUS + 3.5} fill="none" stroke="#f6e6cc" strokeWidth="1.7" /> : null}
+                {targets.some((target) => target.x === piece.x && target.y === piece.y) ? (
+                  <circle className="xq-cap" data-x={piece.x} data-y={piece.y} r={RADIUS + 3.5} fill="rgba(251,113,133,0.16)" stroke="#fb7185" strokeWidth="1.8" pointerEvents="none" />
+                ) : null}
               </g>
             );
           })}
         </svg>
       </div>
       <div className="xq-side">
-        <p className="xq-log" aria-live="polite">{status}</p>
+        <p className={`xq-log${status === "将军！" ? " is-check" : ""}${status.endsWith("胜") ? " is-win" : ""}`} data-status={status} aria-live="polite">{status}</p>
         <div className="xq-actions">
           <button type="button" className="w-chip" onClick={undo} disabled={history.length === 0}>
             悔棋

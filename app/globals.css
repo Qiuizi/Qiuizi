@@ -481,10 +481,50 @@ a {
 }
 
 .xq-log {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border: 1px solid rgba(214, 176, 122, 0.28);
+  border-radius: 999px;
+  background: rgba(20, 14, 10, 0.72);
+  padding: 4px 10px;
   color: #f0d7b4;
   font-size: 12.5px;
+  font-weight: 700;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
 }
+
+.xq-log.is-check { border-color: rgba(251, 113, 133, 0.45); color: #fecdd3; }
+.xq-log.is-win { border-color: rgba(250, 204, 21, 0.4); color: #fde68a; }
+
+.ls-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.ls-badges span {
+  border: 1px solid rgba(176, 198, 228, 0.22);
+  border-radius: 999px;
+  background: rgba(8, 12, 20, 0.5);
+  padding: 4px 10px;
+  color: #d7e6f4;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.ls-stage {
+  display: grid;
+  min-height: 108px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%),
+    rgba(6, 8, 14, 0.72);
+  padding: 14px;
+}
+
+.ls-panel { display: grid; justify-items: center; gap: 8px; text-align: center; }
+.ls-kicker { color: #9ec3dd; font-size: 11px; letter-spacing: 0.12em; }
+.ls-panel strong { color: #f8fafc; font-size: 15px; }
+.ls-ms { font-family: var(--font-mono); font-size: 22px; color: #f6e6cc; }
 
 .w-chip:disabled {
   opacity: 0.4;

@@ -31,11 +31,15 @@ type Win = {
 
 const initialWindows: Win[] = [
   { id: "qisland", appName: "Qisland", title: "Qisland — Windows 灵动岛", badge: "v4.3.0 · C#", geom: homeLayout.qisland, z: 14, hidden: false, max: false },
-  { id: "coursedesk", appName: "CourseDesk", title: "CourseDesk / CourseWorkspace", badge: "AI 工作台", geom: homeLayout.coursedesk, z: 12, hidden: false, max: false },
   { id: "deepunpack", appName: "DeepUnpack", title: "DeepUnpack（解到底）", badge: "递归解压", geom: homeLayout.deepunpack, z: 13, hidden: false, max: false },
-  { id: "xiangqi", appName: "XiangqiStudio", title: "XiangqiStudio — 中国象棋工作室", badge: "v1.0.0", geom: homeLayout.xiangqi, z: 15, hidden: false, max: false },
+  { id: "coursedesk", appName: "CourseDesk", title: "CourseDesk / CourseWorkspace", badge: "AI 工作台", geom: homeLayout.coursedesk, z: 12, hidden: false, max: false },
+  { id: "lightskip", appName: "LightSkip", title: "轻跳 · LightSkip — Android 开屏跳过", badge: "v0.2.0 · Android / Java", geom: homeLayout.lightskip, z: 15, hidden: false, max: false },
+  { id: "xiangqi", appName: "XiangqiStudio", title: "XiangqiStudio — 中国象棋工作室", badge: "v1.0.0", geom: homeLayout.xiangqi, z: 16, hidden: true, max: false },
   { id: "finder", appName: "Finder · 更多作品", title: "Finder — 更多在线 Web 与开源作品", badge: "05 — 10", geom: homeLayout.finder, z: 20, hidden: true, max: false },
 ];
+
+const defaultOpen = new Set<WinId>(["qisland", "deepunpack", "coursedesk", "lightskip"]);
+const islandClear = 76;
 
 function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -69,7 +73,7 @@ export function OsDesktop() {
     return {
       w,
       x: Math.max(8, Math.min(Math.max(8, b.w - 140), geom.x)),
-      y: Math.max(8, Math.min(Math.max(8, b.h - 72), geom.y)),
+      y: Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), geom.y)),
     };
   }
 
@@ -106,24 +110,36 @@ export function OsDesktop() {
 
   function tile() {
     const b = box();
-    const gap = 14;
-    const right = Math.min(520, Math.max(360, b.w * 0.38));
-    const left = Math.max(260, b.w - gap * 3 - right);
-    const mid = Math.max(200, Math.round((b.h - gap * 3) * 0.42));
-    const half = Math.max(220, (left - gap) / 2);
-    const placed: Partial<Record<WinId, Geom>> = {
-      qisland: { x: gap, y: gap, w: half },
-      deepunpack: { x: gap * 2 + half, y: gap, w: half },
-      coursedesk: { x: gap, y: gap * 2 + mid, w: left },
-      xiangqi: { x: gap * 2 + left, y: gap, w: right },
-    };
-    setWindows((current) =>
-      current.map((win) => {
+    const gap = 16;
+    const top = islandClear;
+    setWindows((current) => {
+      const xiangqiOpen = current.some((win) => win.id === "xiangqi" && !win.hidden);
+      const finderOpen = current.some((win) => win.id === "finder" && !win.hidden);
+      const placed: Partial<Record<WinId, Geom>> = {};
+      if (xiangqiOpen) {
+        const right = Math.min(520, Math.max(400, Math.round(b.w * 0.36)));
+        const col = Math.max(220, (b.w - right - gap * 4) / 2);
+        const row = Math.max(160, Math.round((b.h - top - gap * 2) / 2));
+        placed.qisland = { x: gap, y: top, w: col };
+        placed.deepunpack = { x: gap * 2 + col, y: top, w: col };
+        placed.coursedesk = { x: gap, y: top + gap + row, w: col };
+        placed.lightskip = { x: gap * 2 + col, y: top + gap + row, w: col };
+        placed.xiangqi = { x: b.w - gap - right, y: top, w: right };
+      } else {
+        const col = Math.max(240, (b.w - gap * 3) / 2);
+        const row = Math.max(160, Math.round((b.h - top - gap * 2) / 2));
+        placed.qisland = { x: gap, y: top, w: col };
+        placed.deepunpack = { x: gap * 2 + col, y: top, w: col };
+        placed.coursedesk = { x: gap, y: top + gap + row, w: col };
+        placed.lightskip = { x: gap * 2 + col, y: top + gap + row, w: col };
+      }
+      if (finderOpen) placed.finder = { x: Math.max(gap, Math.round((b.w - 440) / 2)), y: top + 28, w: Math.min(440, b.w - gap * 2) };
+      return current.map((win) => {
         const geom = placed[win.id];
         if (!geom) return win;
-        return { ...win, hidden: false, max: false, geom };
-      }),
-    );
+        return { ...win, geom, max: false, hidden: defaultOpen.has(win.id) ? false : win.hidden };
+      });
+    });
   }
 
   function resetLayout() {
@@ -131,7 +147,7 @@ export function OsDesktop() {
       current.map((win) => ({
         ...win,
         max: false,
-        hidden: win.id === "finder",
+        hidden: !defaultOpen.has(win.id),
         geom: clamp(homeLayout[win.id]),
       })),
     );
@@ -199,7 +215,7 @@ export function OsDesktop() {
     const move = (ev: PointerEvent) => {
       const b = box();
       const x = Math.max(8, Math.min(Math.max(8, b.w - 140), origin.x + ev.clientX - startX));
-      const y = Math.max(8, Math.min(Math.max(8, b.h - 72), origin.y + ev.clientY - startY));
+      const y = Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), origin.y + ev.clientY - startY));
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         setWindows((current) => current.map((item) => (item.id === id ? { ...item, geom: { ...item.geom, x, y } } : item)));
@@ -341,6 +357,7 @@ export function OsDesktop() {
               ) : null}
               {win.id === "coursedesk" ? <CourseBody note={note} onNote={setNote} /> : null}
               {win.id === "deepunpack" ? <UnpackBody unpacked={unpacked} onToggle={() => setUnpacked((value) => !value)} /> : null}
+              {win.id === "lightskip" ? <LightSkipBody /> : null}
               {win.id === "xiangqi" ? <XiangqiBoard onInteract={() => focusWin("xiangqi")} /> : null}
               {win.id === "finder" ? <FinderBody /> : null}
             </div>
@@ -447,6 +464,58 @@ function UnpackBody({ unpacked, onToggle }: { unpacked: boolean; onToggle: () =>
           {unpacked ? "复位压缩包" : "一键解到底"}
         </button>
         <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/DeepUnpack">GitHub 源码 ↗</ExternalLink>
+      </div>
+    </>
+  );
+}
+
+function LightSkipBody() {
+  const [phase, setPhase] = useState<"idle" | "splash" | "skipped">("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const started = useRef(0);
+
+  function trigger() {
+    started.current = performance.now();
+    setPhase("splash");
+  }
+
+  function skip() {
+    setElapsed(Math.max(1, Math.round(performance.now() - started.current)));
+    setPhase("skipped");
+  }
+
+  return (
+    <>
+      <p className="win-desc">不联网、零第三方依赖的 Android 开屏广告自动跳过工具。零 INTERNET 权限，默认白名单生效，内置 25 套规则与本地录制，并附国产 ROM 保活指引。</p>
+      <div className="ls-badges" aria-label="LightSkip 特性">
+        <span>零联网</span>
+        <span>白名单</span>
+        <span>25 套规则</span>
+      </div>
+      <div className="ls-stage" aria-live="polite">
+        {phase === "splash" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">开屏广告</span>
+            <strong>全屏素材</strong>
+            <button type="button" className="w-chip is-on" onClick={skip}>跳过</button>
+          </div>
+        ) : null}
+        {phase === "skipped" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">已跳过</span>
+            <strong className="ls-ms">{elapsed} ms</strong>
+            <button type="button" className="w-chip" onClick={trigger}>再测一次</button>
+          </div>
+        ) : null}
+        {phase === "idle" ? (
+          <div className="ls-panel">
+            <span className="ls-kicker">等待开屏</span>
+            <button type="button" className="w-chip is-on" onClick={trigger}>触发开屏测试</button>
+          </div>
+        ) : null}
+      </div>
+      <div className="win-actions">
+        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/LightSkip">GitHub 源码 ↗</ExternalLink>
       </div>
     </>
   );

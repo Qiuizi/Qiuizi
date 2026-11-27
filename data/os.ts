@@ -1,17 +1,18 @@
-export type WinId = "qisland" | "coursedesk" | "deepunpack" | "xiangqi" | "finder";
+export type WinId = "qisland" | "coursedesk" | "deepunpack" | "lightskip" | "xiangqi" | "finder";
 
 export type Geom = { x: number; y: number; w: number };
 
 export type IslandMode = "focus" | "media" | "alert";
 
-export const flagshipOrder = ["qisland", "coursedesk", "deepunpack", "xiangqi"] as const;
+export const flagshipOrder = ["qisland", "coursedesk", "deepunpack", "lightskip"] as const;
 
 export const homeLayout: Record<WinId, Geom> = {
-  qisland: { x: 28, y: 18, w: 400 },
-  deepunpack: { x: 444, y: 18, w: 420 },
-  coursedesk: { x: 28, y: 360, w: 836 },
-  xiangqi: { x: 884, y: 18, w: 528 },
-  finder: { x: 460, y: 140, w: 400 },
+  qisland: { x: 18, y: 76, w: 692 },
+  deepunpack: { x: 728, y: 76, w: 694 },
+  coursedesk: { x: 18, y: 400, w: 692 },
+  lightskip: { x: 728, y: 400, w: 694 },
+  xiangqi: { x: 456, y: 76, w: 528 },
+  finder: { x: 490, y: 160, w: 440 },
 };
 
 export const islandCopy: Record<IslandMode, { title: string; value: string }> = {
@@ -69,6 +70,7 @@ export const dockItems: { id: WinId; label: string; mark: string; gradient: stri
   { id: "qisland", label: "Qisland", mark: "Q", gradient: "linear-gradient(145deg,#0EA5E9,#2563EB)", shortcut: "1" },
   { id: "coursedesk", label: "CourseDesk", mark: "C", gradient: "linear-gradient(145deg,#10B981,#047857)", shortcut: "2" },
   { id: "deepunpack", label: "DeepUnpack", mark: "D", gradient: "linear-gradient(145deg,#F59E0B,#D97706)", shortcut: "3" },
-  { id: "xiangqi", label: "XiangqiStudio", mark: "象", gradient: "linear-gradient(145deg,#F43F5E,#BE123C)", shortcut: "4" },
+  { id: "lightskip", label: "LightSkip", mark: "L", gradient: "linear-gradient(145deg,#A78BFA,#6D28D9)", shortcut: "4" },
+  { id: "xiangqi", label: "XiangqiStudio", mark: "象", gradient: "linear-gradient(145deg,#F43F5E,#BE123C)" },
   { id: "finder", label: "更多作品 Finder", mark: "+", gradient: "linear-gradient(145deg,#6366F1,#4338CA)" },
 ];
