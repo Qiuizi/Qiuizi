@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Aurora } from "@/components/aurora";
 import { ExternalLink } from "@/components/external-link";
 import {
   courseNotes,
@@ -250,7 +251,7 @@ export function OsDesktop() {
 
   return (
     <div className="os-root">
-      <div className="wallpaper" />
+      <Aurora />
       <div className="wallpaper-watermark" aria-hidden="true">
         Qiuizi
       </div>

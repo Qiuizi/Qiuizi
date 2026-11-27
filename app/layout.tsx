@@ -32,7 +32,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              ".menubar,.os-island,.win,.dock-bar{backdrop-filter:blur(28px) saturate(185%);-webkit-backdrop-filter:blur(28px) saturate(185%)}",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
