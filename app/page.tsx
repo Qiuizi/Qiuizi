@@ -1,11 +1,5 @@
-import { Showcase } from "@/components/showcase";
-import { WorksGrid } from "@/components/works-grid";
+import { OsDesktop } from "@/components/os-desktop";
 
 export default function HomePage() {
-  return (
-    <main className="mx-auto w-full max-w-[1040px] px-4 pt-[26px] sm:px-6">
-      <Showcase />
-      <WorksGrid />
-    </main>
-  );
+  return <OsDesktop />;
 }
