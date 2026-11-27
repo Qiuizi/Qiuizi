@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { ExternalLink } from "@/components/external-link";
 import { initialPieces, legalMoves, otherSide, playMove, positionStatus, type Piece, type Point, type Side } from "@/lib/xiangqi";
 
 type Snapshot = { pieces: Piece[]; turn: Side };
@@ -322,7 +321,6 @@ export function XiangqiBoard({ onInteract }: { onInteract?: () => void }) {
           <button type="button" className="w-chip" onClick={reset}>
             重摆
           </button>
-          <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/XiangqiStudio">GitHub ↗</ExternalLink>
         </div>
       </div>
       {drag ? (

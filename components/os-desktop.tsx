@@ -1,45 +1,56 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Aurora } from "@/components/aurora";
 import { ExternalLink } from "@/components/external-link";
-import { XiangqiBoard } from "@/components/xiangqi-board";
+import { MobileHome } from "@/components/mobile-home";
+import { Spotlight, type SpotlightCommand } from "@/components/spotlight";
+import { WindowSurface, releaseHref, releaseLabel, type DemoState, type PanelTab } from "@/components/window-surface";
 import {
-  courseNotes,
   dockItems,
   finderItems,
   flagshipOrder,
   homeLayout,
-  islandCopy,
+  iconStyle,
+  islandText,
+  isProjectId,
+  launcherOrder,
+  projectById,
+  projects,
+  windowChrome,
+  windowOrder,
   type Geom,
   type IslandMode,
   type WinId,
 } from "@/data/os";
+import { LAYOUT_KEY, readLayout, readMotion, sanitizeWindow, writeLayout, writeMotion, type StoredLayout } from "@/lib/layout-store";
+import type { ReleaseMap } from "@/lib/releases";
 import { site } from "@/lib/site";
 
 type Win = {
   id: WinId;
-  appName: string;
-  title: string;
-  badge: string;
   geom: Geom;
   z: number;
   hidden: boolean;
   max: boolean;
-  restore?: Geom;
 };
 
-const initialWindows: Win[] = [
-  { id: "qisland", appName: "Qisland", title: "Qisland — Windows 灵动岛", badge: "v4.3.0 · C#", geom: homeLayout.qisland, z: 14, hidden: false, max: false },
-  { id: "deepunpack", appName: "DeepUnpack", title: "DeepUnpack（解到底）", badge: "递归解压", geom: homeLayout.deepunpack, z: 13, hidden: false, max: false },
-  { id: "coursedesk", appName: "CourseDesk", title: "CourseDesk / CourseWorkspace", badge: "AI 工作台", geom: homeLayout.coursedesk, z: 12, hidden: false, max: false },
-  { id: "lightskip", appName: "LightSkip", title: "轻跳 · LightSkip — Android 开屏跳过", badge: "v0.2.0 · Android / Java", geom: homeLayout.lightskip, z: 15, hidden: false, max: false },
-  { id: "xiangqi", appName: "XiangqiStudio", title: "XiangqiStudio — 中国象棋工作室", badge: "v1.0.0", geom: homeLayout.xiangqi, z: 16, hidden: true, max: false },
-  { id: "finder", appName: "Finder · 更多作品", title: "Finder — 更多在线 Web 与开源作品", badge: "05 — 10", geom: homeLayout.finder, z: 20, hidden: true, max: false },
-];
+type Edge = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
 
-const defaultOpen = new Set<WinId>(["qisland", "deepunpack", "coursedesk", "lightskip"]);
-const islandClear = 76;
+const EDGES: Edge[] = ["n", "s", "e", "w", "ne", "nw", "se", "sw"];
+const MIN_W = 300;
+const MIN_H = 220;
+const ISLAND_CLEAR = 76;
+
+function buildWindows(): Win[] {
+  return windowOrder.map((id, index) => ({
+    id,
+    geom: homeLayout[id],
+    z: 12 + index,
+    hidden: id !== "welcome",
+    max: false,
+  }));
+}
 
 function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -49,51 +60,121 @@ function isMobile() {
   return window.matchMedia("(max-width: 767px)").matches;
 }
 
-export function OsDesktop() {
-  const [windows, setWindows] = useState(initialWindows);
-  const [focused, setFocused] = useState<WinId>("qisland");
+export function OsDesktop({ releases }: { releases: ReleaseMap }) {
+  const [windows, setWindows] = useState(buildWindows);
+  const [focused, setFocused] = useState<WinId>("welcome");
   const [island, setIsland] = useState<IslandMode>("focus");
   const [note, setNote] = useState<1 | 2 | 3>(1);
   const [unpacked, setUnpacked] = useState(false);
+  const [tabs, setTabs] = useState<Partial<Record<WinId, PanelTab>>>({});
   const [dragging, setDragging] = useState<WinId | null>(null);
-  const [wallpaperOn, setWallpaperOn] = useState(true);
+  const [resizing, setResizing] = useState<WinId | null>(null);
+  const [motionOn, setMotionOn] = useState(true);
+  const [reduceMotionOn, setReduceMotionOn] = useState(false);
+  const [palette, setPalette] = useState(false);
+  const [sheet, setSheet] = useState<WinId | null>(null);
+  const [mobile, setMobile] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const desktopRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<HTMLElement>(null);
-  const zRef = useRef(25);
+  const zRef = useRef(30);
+  const latest = useRef<{
+    palette: boolean;
+    sheet: WinId | null;
+    openWin: (id: WinId, tab?: PanelTab) => void;
+    hideWin: (id: WinId) => void;
+    resetLayout: () => void;
+    copyEmail: () => void;
+  }>({
+    palette: false,
+    sheet: null,
+    openWin: () => undefined,
+    hideWin: () => undefined,
+    resetLayout: () => undefined,
+    copyEmail: () => undefined,
+  });
+
+  const wallpaperPlaying = motionOn && !reduceMotionOn;
+  const islandView = islandText(island, releases.Qisland.tag);
 
   function box() {
     const node = desktopRef.current;
-    if (!node) return { w: window.innerWidth, h: Math.max(320, window.innerHeight - 122) };
-    return { w: node.clientWidth, h: node.clientHeight };
+    const width = node?.clientWidth ?? 0;
+    const height = node?.clientHeight ?? 0;
+    if (width < 200 || height < 200) return { w: 1280, h: 760 };
+    return { w: width, h: height };
   }
 
   function clamp(geom: Geom): Geom {
     const b = box();
-    const w = Math.min(geom.w, Math.max(260, b.w - 16));
+    const w = Math.min(Math.max(MIN_W, geom.w), Math.max(MIN_W, b.w - 16));
+    const h = Math.min(Math.max(MIN_H, geom.h), Math.max(MIN_H, b.h - ISLAND_CLEAR - 12));
     return {
       w,
-      x: Math.max(8, Math.min(Math.max(8, b.w - 140), geom.x)),
-      y: Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), geom.y)),
+      h,
+      x: Math.max(8, Math.min(geom.x, Math.max(8, b.w - w - 8))),
+      y: Math.max(ISLAND_CLEAR, Math.min(geom.y, Math.max(ISLAND_CLEAR, b.h - h - 8))),
     };
+  }
+
+  function resizeGeom(origin: Geom, edge: Edge, dx: number, dy: number): Geom {
+    const b = box();
+    const east = edge === "e" || edge === "ne" || edge === "se";
+    const west = edge === "w" || edge === "nw" || edge === "sw";
+    const south = edge === "s" || edge === "se" || edge === "sw";
+    const north = edge === "n" || edge === "ne" || edge === "nw";
+    let { x, y, w, h } = origin;
+    if (east) w = origin.w + dx;
+    if (west) {
+      w = origin.w - dx;
+      x = origin.x + origin.w - w;
+    }
+    if (south) h = origin.h + dy;
+    if (north) {
+      h = origin.h - dy;
+      y = origin.y + origin.h - h;
+    }
+    if (w < MIN_W) {
+      if (west) x -= MIN_W - w;
+      w = MIN_W;
+    }
+    if (h < MIN_H) {
+      if (north) y -= MIN_H - h;
+      h = MIN_H;
+    }
+    if (x < 8) {
+      w -= 8 - x;
+      x = 8;
+    }
+    if (y < ISLAND_CLEAR) {
+      h -= ISLAND_CLEAR - y;
+      y = ISLAND_CLEAR;
+    }
+    const maxRight = b.w - 8;
+    const maxBottom = b.h - 8;
+    if (x + w > maxRight) {
+      if (east) w = Math.max(MIN_W, maxRight - x);
+      else x = Math.max(8, maxRight - w);
+    }
+    if (y + h > maxBottom) {
+      if (south) h = Math.max(MIN_H, maxBottom - y);
+      else y = Math.max(ISLAND_CLEAR, maxBottom - h);
+    }
+    return { x, y, w, h };
   }
 
   function focusWin(id: WinId) {
     const z = ++zRef.current;
     setFocused(id);
     setWindows((current) => current.map((win) => (win.id === id ? { ...win, hidden: false, z } : win)));
-    if (isMobile()) {
-      const behavior = reducedMotion() ? "auto" : "smooth";
-      document.getElementById(`win-${id}`)?.scrollIntoView({ behavior, block: "start" });
-    }
   }
 
   function hideWin(id: WinId) {
-    setWindows((current) => {
-      const next = current.map((win) => (win.id === id ? { ...win, hidden: true, max: false } : win));
-      const top = [...next].filter((win) => !win.hidden).sort((a, b) => b.z - a.z)[0];
-      setFocused(top?.id ?? "qisland");
-      return next;
-    });
+    const next = windows.map((win) => (win.id === id ? { ...win, hidden: true, max: false } : win));
+    const top = [...next].filter((win) => !win.hidden).sort((a, b) => b.z - a.z)[0];
+    setWindows(next);
+    setFocused(top?.id ?? "welcome");
   }
 
   function toggleMax(id: WinId) {
@@ -102,59 +183,176 @@ export function OsDesktop() {
     setWindows((current) =>
       current.map((win) => {
         if (win.id !== id) return win;
-        if (win.max) return { ...win, max: false, hidden: false, z, geom: win.restore ?? win.geom };
-        return { ...win, max: true, hidden: false, z, restore: win.geom };
+        if (win.max) return { ...win, max: false, hidden: false, z };
+        return { ...win, max: true, hidden: false, z };
       }),
     );
   }
 
   function resetLayout() {
-    setWindows((current) =>
-      current.map((win) => ({
-        ...win,
-        max: false,
-        hidden: !defaultOpen.has(win.id),
-        geom: clamp(homeLayout[win.id]),
-      })),
-    );
-    setFocused("qisland");
+    try {
+      localStorage.removeItem(LAYOUT_KEY);
+    } catch {
+      /* Ignore private-mode failures. */
+    }
+    zRef.current = 30;
+    setWindows(buildWindows().map((win) => ({ ...win, geom: clamp(win.geom) })));
+    setFocused("welcome");
+    setTabs({});
+    setPalette(false);
+    setSheet(null);
+  }
+
+  function openWin(id: WinId, tab: PanelTab = "demo") {
+    setTabs((current) => ({ ...current, [id]: tab }));
+    setPalette(false);
+    if (isMobile()) {
+      setSheet(id === "welcome" ? null : id);
+      return;
+    }
+    focusWin(id);
   }
 
   function onDock(id: WinId) {
     const win = windows.find((item) => item.id === id);
-    if (!win || win.hidden || focused !== id) focusWin(id);
+    if (!win || win.hidden || focused !== id) openWin(id, tabs[id] ?? "demo");
     else hideWin(id);
   }
 
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      setWindows((current) => current.map((win) => ({ ...win, geom: clamp(win.geom) })));
-    });
-    function onResize() {
-      setWindows((current) => current.map((win) => (win.max ? win : { ...win, geom: clamp(win.geom) })));
+  async function copyEmail() {
+    const email = site.email;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(email);
+      copied = true;
+    } catch {
+      try {
+        const input = document.createElement("textarea");
+        input.value = email;
+        input.setAttribute("readonly", "");
+        input.style.position = "fixed";
+        input.style.left = "-9999px";
+        document.body.appendChild(input);
+        input.select();
+        copied = document.execCommand("copy");
+        input.remove();
+      } catch {
+        copied = false;
+      }
     }
-    window.addEventListener("resize", onResize);
+    setToast(copied ? "已复制邮箱" : "复制失败");
+    setPalette(false);
+  }
+
+  useLayoutEffect(() => {
+    latest.current = { palette, sheet, openWin, hideWin, resetLayout, copyEmail };
+  });
+
+  useLayoutEffect(() => {
+    // Mount-only: matchMedia and localStorage are unavailable during SSR, and window geometry must be measured.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const media = window.matchMedia("(max-width: 767px)");
+    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyViewport = () => setMobile(media.matches);
+    const applyMotion = () => setReduceMotionOn(motionMedia.matches);
+    applyViewport();
+    applyMotion();
+    media.addEventListener("change", applyViewport);
+    motionMedia.addEventListener("change", applyMotion);
+
+    const saved = readLayout();
+    const motion = readMotion();
+    if (motion !== null) setMotionOn(motion);
+    if (saved) {
+      let maxZ = 30;
+      const next = buildWindows().map((win) => {
+        const item = sanitizeWindow(saved.windows[win.id]);
+        if (!item) return { ...win, geom: clamp(win.geom) };
+        maxZ = Math.max(maxZ, item.z);
+        return { ...win, hidden: item.hidden, max: item.max, z: item.z, geom: clamp({ x: item.x, y: item.y, w: item.w, h: item.h }) };
+      });
+      const visible = next.find((win) => win.id === saved.focused && !win.hidden) ?? next.find((win) => !win.hidden);
+      zRef.current = maxZ;
+      setWindows(next);
+      setFocused(visible?.id ?? "welcome");
+    } else {
+      setWindows((current) => current.map((win) => ({ ...win, geom: clamp(win.geom) })));
+    }
+    setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", onResize);
+      media.removeEventListener("change", applyViewport);
+      motionMedia.removeEventListener("change", applyMotion);
     };
-    // Clamp once against the real desktop box, then again only when the viewport changes.
+    // Clamp once against the real desktop box.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    function onResize() {
+      setWindows((current) => current.map((win) => (win.max ? win : { ...win, geom: clamp(win.geom) })));
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const id = window.setTimeout(() => {
+      const layout: StoredLayout = {
+        v: 1,
+        focused,
+        windows: Object.fromEntries(
+          windows.map((win) => [win.id, { x: win.geom.x, y: win.geom.y, w: win.geom.w, h: win.geom.h, hidden: win.hidden, max: win.max, z: win.z }]),
+        ),
+      };
+      writeLayout(layout);
+    }, 220);
+    return () => window.clearTimeout(id);
+  }, [hydrated, windows, focused]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    writeMotion(motionOn);
+  }, [hydrated, motionOn]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(() => setToast(null), 1800);
+    return () => window.clearTimeout(id);
+  }, [toast]);
+
+  useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-      const target = event.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
-      if (event.key === "Escape") {
+      const key = event.key;
+      if ((event.metaKey || event.ctrlKey) && key.toLowerCase() === "k") {
         event.preventDefault();
-        hideWin("finder");
+        setPalette((open) => !open);
         return;
       }
-      if (event.key >= "1" && event.key <= "4") {
+      if (latest.current.palette) {
+        if (key === "Escape") {
+          event.preventDefault();
+          setPalette(false);
+        }
+        return;
+      }
+      if (key === "Escape") {
         event.preventDefault();
-        focusWin(flagshipOrder[Number(event.key) - 1]);
+        if (latest.current.sheet) {
+          setSheet(null);
+          return;
+        }
+        latest.current.hideWin("finder");
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (!event.metaKey && !event.ctrlKey && !event.altKey && key >= "1" && key <= "4") {
+        event.preventDefault();
+        latest.current.openWin(flagshipOrder[Number(key) - 1]);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -162,26 +360,24 @@ export function OsDesktop() {
   }, []);
 
   function onBarPointerDown(event: React.PointerEvent<HTMLDivElement>, id: WinId) {
-    if (isMobile() || (event.target as HTMLElement).closest("button")) return;
+    if (isMobile() || (event.target as HTMLElement).closest("button, a")) return;
     event.preventDefault();
     const win = windows.find((item) => item.id === id);
-    if (!win) return;
-    const origin = win.max && win.restore ? win.restore : win.geom;
+    if (!win || win.max) return;
+    const origin = win.geom;
     const startX = event.clientX;
     const startY = event.clientY;
     const z = ++zRef.current;
     setFocused(id);
     setDragging(id);
-    setWindows((current) =>
-      current.map((item) => (item.id === id ? { ...item, hidden: false, max: false, z, geom: origin } : item)),
-    );
+    setWindows((current) => current.map((item) => (item.id === id ? { ...item, hidden: false, z } : item)));
     const bar = event.currentTarget;
     bar.setPointerCapture(event.pointerId);
     let raf = 0;
     const move = (ev: PointerEvent) => {
       const b = box();
       const x = Math.max(8, Math.min(Math.max(8, b.w - 140), origin.x + ev.clientX - startX));
-      const y = Math.max(islandClear, Math.min(Math.max(islandClear, b.h - 72), origin.y + ev.clientY - startY));
+      const y = Math.max(ISLAND_CLEAR, Math.min(Math.max(ISLAND_CLEAR, b.h - 72), origin.y + ev.clientY - startY));
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         setWindows((current) => current.map((item) => (item.id === id ? { ...item, geom: { ...item.geom, x, y } } : item)));
@@ -191,18 +387,54 @@ export function OsDesktop() {
       cancelAnimationFrame(raf);
       bar.removeEventListener("pointermove", move);
       bar.removeEventListener("pointerup", up);
+      bar.removeEventListener("pointercancel", up);
       setDragging(null);
     };
     bar.addEventListener("pointermove", move);
     bar.addEventListener("pointerup", up);
+    bar.addEventListener("pointercancel", up);
+  }
+
+  function onResizeDown(event: React.PointerEvent<HTMLDivElement>, id: WinId, edge: Edge) {
+    if (isMobile()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const win = windows.find((item) => item.id === id);
+    if (!win || win.max) return;
+    const origin = win.geom;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const z = ++zRef.current;
+    setFocused(id);
+    setResizing(id);
+    setWindows((current) => current.map((item) => (item.id === id ? { ...item, hidden: false, z } : item)));
+    const handle = event.currentTarget;
+    handle.setPointerCapture(event.pointerId);
+    let raf = 0;
+    const move = (ev: PointerEvent) => {
+      const next = resizeGeom(origin, edge, ev.clientX - startX, ev.clientY - startY);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setWindows((current) => current.map((item) => (item.id === id ? { ...item, geom: next } : item)));
+      });
+    };
+    const up = () => {
+      cancelAnimationFrame(raf);
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", up);
+      handle.removeEventListener("pointercancel", up);
+      setResizing(null);
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", up);
+    handle.addEventListener("pointercancel", up);
   }
 
   useEffect(() => {
     const dock = dockRef.current;
     if (!dock) return;
     const items = [...dock.querySelectorAll<HTMLElement>(".d-app")];
-    const allow = () =>
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches && !reducedMotion() && !isMobile();
+    const allow = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches && !reducedMotion() && !isMobile();
     const move = (event: PointerEvent) => {
       if (!allow() || event.pointerType !== "mouse") return;
       dock.classList.add("is-live");
@@ -225,274 +457,340 @@ export function OsDesktop() {
     };
   }, []);
 
-  const islandView = islandCopy[island];
+  const demo: DemoState = {
+    island,
+    onIsland: setIsland,
+    note,
+    onNote: setNote,
+    unpacked,
+    onUnpack: () => setUnpacked((value) => !value),
+  };
+
+  const commands: SpotlightCommand[] = [
+    {
+      id: "copy-email",
+      group: "操作",
+      title: "复制邮箱",
+      hint: site.email,
+      keywords: "email mail 邮箱 联系 contact copy",
+      pinned: true,
+      run: () => latest.current.copyEmail(),
+    },
+    {
+      id: "toggle-motion",
+      group: "操作",
+      title: motionOn ? "关闭动效" : "开启动效",
+      hint: reduceMotionOn ? "系统正在减少动效" : "壁纸丝绸",
+      keywords: "动效 动画 motion wallpaper 壁纸",
+      pinned: true,
+      run: () => {
+        setMotionOn((value) => !value);
+        setPalette(false);
+      },
+    },
+    {
+      id: "reset-layout",
+      group: "操作",
+      title: "重置布局",
+      hint: "回到欢迎窗口",
+      keywords: "重置 布局 reset layout",
+      pinned: true,
+      run: () => latest.current.resetLayout(),
+    },
+    {
+      id: "open-welcome",
+      group: "项目",
+      title: "欢迎窗口",
+      hint: "Qiuizi OS",
+      keywords: "welcome 欢迎",
+      pinned: true,
+      run: () => latest.current.openWin("welcome"),
+    },
+    {
+      id: "open-about",
+      group: "项目",
+      title: "关于 Qiuizi",
+      hint: "GitHub 与邮箱",
+      keywords: "about 关于 联系 github",
+      pinned: true,
+      run: () => latest.current.openWin("about"),
+    },
+    {
+      id: "open-finder",
+      group: "项目",
+      title: "更多作品",
+      hint: "Finder",
+      keywords: "finder 更多 作品",
+      pinned: true,
+      run: () => latest.current.openWin("finder"),
+    },
+    ...projects.map((project) => ({
+      id: `open-${project.id}`,
+      group: "项目",
+      title: project.name,
+      hint: project.shortcut ? `快捷键 ${project.shortcut}` : "打开窗口",
+      keywords: project.keywords,
+      pinned: true,
+      run: () => latest.current.openWin(project.id, "demo"),
+    })),
+    ...projects.map((project) => ({
+      id: `demo-${project.id}`,
+      group: "交互演示",
+      title: `${project.name} 演示`,
+      hint: project.demoHint,
+      keywords: `${project.keywords} 演示 demo`,
+      pinned: false,
+      run: () => latest.current.openWin(project.id, "demo"),
+    })),
+    ...projects.map((project) => ({
+      id: `dive-${project.id}`,
+      group: "深潜",
+      title: `${project.name} 深潜`,
+      hint: "问题、做法与技术栈",
+      keywords: `${project.keywords} 深潜 架构 技术栈`,
+      pinned: false,
+      run: () => latest.current.openWin(project.id, "dive"),
+    })),
+    ...projects
+      .filter((project) => project.repo)
+      .map((project) => {
+        const release = releases[project.repo!];
+        return {
+          id: `dl-${project.id}`,
+          group: "下载",
+          title: releaseLabel(project.name, release),
+          hint: release.assetName ?? "GitHub Releases",
+          keywords: `${project.keywords} 下载 release github`,
+          pinned: true,
+          run: () => {
+            window.open(releaseHref(project, release), "_blank", "noopener,noreferrer");
+            setPalette(false);
+          },
+        };
+      }),
+    {
+      id: "dl-info-station",
+      group: "下载",
+      title: releaseLabel("info-station", releases["info-station"]),
+      hint: releases["info-station"].assetName ?? "GitHub Releases",
+      keywords: "info-station 下载 release 信息",
+      pinned: true,
+      run: () => {
+        window.open(releases["info-station"].downloadUrl ?? releases["info-station"].url, "_blank", "noopener,noreferrer");
+        setPalette(false);
+      },
+    },
+    ...finderItems.map((item) => ({
+      id: `find-${item.name}`,
+      group: "更多作品",
+      title: item.name,
+      hint: item.detail,
+      keywords: item.keywords,
+      pinned: false,
+      run: () => {
+        window.open(item.href, "_blank", "noopener,noreferrer");
+        setPalette(false);
+      },
+    })),
+  ];
 
   function cycleIsland() {
     setIsland((mode) => (mode === "focus" ? "media" : mode === "media" ? "alert" : "focus"));
   }
 
   return (
-    <div className="os-root">
-      <Aurora playing={wallpaperOn} />
+    <div className="os-root" data-hydrated={hydrated ? "true" : "false"} data-viewport={mobile ? "mobile" : "desktop"}>
+      <Aurora playing={wallpaperPlaying} />
       <div className="wallpaper-watermark" aria-hidden="true">
         Qiuizi
       </div>
-      <p className="sr-only">数字键 1 到 4 唤起旗舰窗口，Escape 关闭 Finder。</p>
+      <h1 className="sr-only">Qiuizi OS</h1>
+      <p className="sr-only">按 Command 或 Control 加 K 打开搜索。数字键 1 到 4 打开旗舰窗口，Escape 关闭搜索或 Finder。</p>
 
-      <header className="menubar">
-        <div className="mb-left">
-          <span className="mb-brand">◆ Qiuizi OS</span>
-          <button className="mb-btn" type="button" onClick={resetLayout}>
-            重置布局
-          </button>
-          <button className="mb-btn" type="button" onClick={() => focusWin("finder")}>
-            更多作品
-          </button>
-        </div>
-        <div className="mb-right">
-          <button
-            className={`mb-btn${wallpaperOn ? " is-on" : ""}`}
-            type="button"
-            aria-pressed={wallpaperOn}
-            aria-label={wallpaperOn ? "暂停背景动效" : "播放背景动效"}
-            onClick={() => setWallpaperOn((value) => !value)}
-          >
-            动效
-          </button>
-          <ExternalLink href={site.github} className="mb-gh">
-            GitHub ↗
-          </ExternalLink>
-        </div>
-      </header>
-
-      <button
-        type="button"
-        className={`os-island${island === "alert" ? " expanded" : ""}`}
-        onClick={cycleIsland}
-        aria-label={`Qisland 灵动岛，当前${islandView.title}，点击切换形态`}
-      >
-        <span className="oi-main">
-          <span className="oi-dot" aria-hidden="true" />
-          <span className="oi-title">{islandView.title}</span>
-        </span>
-        <span className="oi-val">{islandView.value}</span>
-      </button>
-
-      <main ref={desktopRef} className="desktop" id="desktop">
-        {windows.map((win) => (
-          <section
-            key={win.id}
-            id={`win-${win.id}`}
-            className={`win${focused === win.id && !win.hidden ? " focused" : ""}${win.hidden ? " hidden" : ""}${win.max ? " maximized" : ""}${dragging === win.id ? " dragging" : ""}`}
-            style={{ left: win.geom.x, top: win.geom.y, width: win.geom.w, zIndex: win.z }}
-            aria-hidden={win.hidden}
-            onPointerDown={() => {
-              if (!win.hidden) focusWin(win.id);
-            }}
-          >
-            <div className="win-bar" onPointerDown={(event) => onBarPointerDown(event, win.id)}>
-              <div className="traffic">
-                <button className="t-close" type="button" aria-label={`关闭${win.appName}`} onClick={() => hideWin(win.id)}>
-                  <span />
-                </button>
-                <button className="t-min" type="button" aria-label={`最小化${win.appName}`} onClick={() => hideWin(win.id)}>
-                  <span />
-                </button>
-                <button
-                  className="t-max"
-                  type="button"
-                  aria-label={win.max ? `还原${win.appName}` : `放大${win.appName}`}
-                  aria-pressed={win.max}
-                  onClick={() => toggleMax(win.id)}
-                >
-                  <span />
-                </button>
-              </div>
-              <div className="win-title">{win.title}</div>
-              <div className="win-badge">{win.badge}</div>
-            </div>
-            <div className={`win-body${win.id === "xiangqi" ? " xq-host" : ""}`}>
-              {win.id === "qisland" ? (
-                <QislandBody mode={island} onMode={setIsland} />
-              ) : null}
-              {win.id === "coursedesk" ? <CourseBody note={note} onNote={setNote} /> : null}
-              {win.id === "deepunpack" ? <UnpackBody unpacked={unpacked} onToggle={() => setUnpacked((value) => !value)} /> : null}
-              {win.id === "lightskip" ? <LightSkipBody /> : null}
-              {win.id === "xiangqi" ? <XiangqiBoard onInteract={() => focusWin("xiangqi")} /> : null}
-              {win.id === "finder" ? <FinderBody /> : null}
-            </div>
-          </section>
-        ))}
-      </main>
-
-      <nav ref={dockRef} className="dock-bar" aria-label="Qiuizi OS Dock">
-        {dockItems.map((item) => {
-          const win = windows.find((entry) => entry.id === item.id);
-          const open = Boolean(win && !win.hidden);
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className="d-app"
-              aria-pressed={open}
-              aria-keyshortcuts={item.shortcut}
-              onClick={() => onDock(item.id)}
-            >
-              <span className="d-tip">{item.label}</span>
-              <span className="d-icon" style={{ background: item.gradient }} aria-hidden="true">
-                {item.mark}
-              </span>
-              <span className={`d-dot${open ? "" : " off"}`} aria-hidden="true" />
+      <div className="desktop-shell" inert={mobile ? true : undefined}>
+        <header className="menubar">
+          <div className="mb-left">
+            <button className="mb-brand" type="button" onClick={() => openWin("welcome")}>
+              ◆ Qiuizi OS
             </button>
-          );
-        })}
-      </nav>
-    </div>
-  );
-}
-
-function QislandBody({ mode, onMode }: { mode: IslandMode; onMode: (mode: IslandMode) => void }) {
-  const modes: { id: IslandMode; label: string }[] = [
-    { id: "focus", label: "专注 25:00" },
-    { id: "media", label: "媒体播放" },
-    { id: "alert", label: "展开提醒" },
-  ];
-  return (
-    <>
-      <p className="win-desc">把灵动岛带到 Windows 桌面顶部边缘：媒体播放、专注计时与轻提醒顺手停靠，点击下方实时控制上方灵动岛胶囊。</p>
-      <div className="win-actions" role="radiogroup" aria-label="灵动岛形态">
-        {modes.map((item) => (
-          <button key={item.id} type="button" role="radio" aria-checked={mode === item.id} className={`w-chip${mode === item.id ? " is-on" : ""}`} onClick={() => onMode(item.id)}>
-            {item.label}
-          </button>
-        ))}
-      </div>
-      <div className="win-actions">
-        <ExternalLink className="w-link w-primary" href="https://qiuizi.github.io/Qisland/">访问官网 ↗</ExternalLink>
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/Qisland">GitHub 源码</ExternalLink>
-      </div>
-    </>
-  );
-}
-
-function CourseBody({ note, onNote }: { note: 1 | 2 | 3; onNote: (note: 1 | 2 | 3) => void }) {
-  const tabs = [
-    { id: 1 as const, label: "本课要点" },
-    { id: 2 as const, label: "关联前序" },
-    { id: 3 as const, label: "随手问 AI" },
-  ];
-  return (
-    <>
-      <p className="win-desc">课件与录音拖入即自动归课，一键串跑输出三层结构化笔记并随时追问单课 AI。</p>
-      <div className="win-actions" role="radiogroup" aria-label="笔记层级">
-        {tabs.map((tab) => (
-          <button key={tab.id} type="button" role="radio" aria-checked={note === tab.id} className={`w-chip${note === tab.id ? " is-on" : ""}`} onClick={() => onNote(tab.id)}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className="code-box" aria-live="polite">{courseNotes[note]}</div>
-      <div className="win-actions">
-        <ExternalLink className="w-link w-primary" href="https://qiuizi.github.io/CourseDesk/">访问官网 ↗</ExternalLink>
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/CourseDesk">GitHub 源码</ExternalLink>
-      </div>
-    </>
-  );
-}
-
-function UnpackBody({ unpacked, onToggle }: { unpacked: boolean; onToggle: () => void }) {
-  return (
-    <>
-      <p className="win-desc">多层套娃压缩包一键解到底、自动展平目录并清理系统垃圾，内置筛选预览与批量重命名。</p>
-      <div className="code-box" aria-live="polite">
-        {unpacked ? (
-          <>
-            <span className="code-ok">✓ 已递归拆解 3 层并展平目录</span>
-            <br />
-            spec.pdf · preview.png · data.csv（已清理垃圾）
-          </>
-        ) : (
-          <>
-            📦 delivery.zip → 📁 delivery/ → 📦 assets.rar → 📦 pack.7z
-            <br />
-            <span className="code-muted">含 __MACOSX / .DS_Store 垃圾文件</span>
-          </>
-        )}
-      </div>
-      <div className="win-actions">
-        <button type="button" className={`w-chip${unpacked ? "" : " is-on"}`} onClick={onToggle}>
-          {unpacked ? "复位压缩包" : "一键解到底"}
-        </button>
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/DeepUnpack">GitHub 源码 ↗</ExternalLink>
-      </div>
-    </>
-  );
-}
-
-function LightSkipBody() {
-  const [phase, setPhase] = useState<"idle" | "splash" | "skipped">("idle");
-  const [elapsed, setElapsed] = useState(0);
-  const started = useRef(0);
-
-  function trigger() {
-    started.current = performance.now();
-    setPhase("splash");
-  }
-
-  function skip() {
-    setElapsed(Math.max(1, Math.round(performance.now() - started.current)));
-    setPhase("skipped");
-  }
-
-  return (
-    <>
-      <p className="win-desc">不联网、零第三方依赖的 Android 开屏广告自动跳过工具。零 INTERNET 权限，默认白名单生效，内置 25 套规则与本地录制，并附国产 ROM 保活指引。</p>
-      <div className="ls-badges" aria-label="LightSkip 特性">
-        <span className="ls-pill">零联网</span>
-        <span className="ls-pill">白名单</span>
-        <span className="ls-pill">25 套规则</span>
-      </div>
-      <div className="ls-stage" aria-live="polite">
-        {phase === "splash" ? (
-          <div className="ls-panel">
-            <span className="ls-kicker">开屏广告</span>
-            <strong>全屏素材</strong>
-            <button type="button" className="w-chip is-on" onClick={skip}>跳过</button>
+            <button className="mb-btn" type="button" onClick={resetLayout}>
+              重置布局
+            </button>
+            <button className="mb-btn" type="button" onClick={() => openWin("finder")}>
+              更多作品
+            </button>
+            <button className="mb-btn" type="button" onClick={() => openWin("about")}>
+              关于
+            </button>
           </div>
-        ) : null}
-        {phase === "skipped" ? (
-          <div className="ls-panel">
-            <span className="ls-kicker">已跳过</span>
-            <strong className="ls-ms">{elapsed} ms</strong>
-            <button type="button" className="w-chip" onClick={trigger}>再测一次</button>
+          <div className="mb-right">
+            <button className="mb-search" type="button" onClick={() => setPalette(true)} aria-keyshortcuts="Meta+K Control+K">
+              搜索
+              <kbd>⌘K</kbd>
+            </button>
+            <button
+              className={`mb-btn${wallpaperPlaying ? " is-on" : ""}`}
+              type="button"
+              aria-pressed={motionOn}
+              aria-label={reduceMotionOn ? "系统已请求减少动效，壁纸保持静止" : motionOn ? "暂停背景动效" : "播放背景动效"}
+              title={reduceMotionOn ? "系统已请求减少动效" : undefined}
+              onClick={() => setMotionOn((value) => !value)}
+            >
+              动效
+            </button>
+            <ExternalLink href={site.github} className="mb-gh">
+              GitHub ↗
+            </ExternalLink>
           </div>
-        ) : null}
-        {phase === "idle" ? (
-          <div className="ls-panel">
-            <span className="ls-kicker">等待开屏</span>
-            <button type="button" className="w-chip is-on" onClick={trigger}>触发开屏测试</button>
-          </div>
-        ) : null}
-      </div>
-      <div className="win-actions">
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/LightSkip">GitHub 源码 ↗</ExternalLink>
-      </div>
-    </>
-  );
-}
+        </header>
 
-function FinderBody() {
-  return (
-    <div className="finder-list">
-      {finderItems.map((item) => (
-        <ExternalLink key={item.name} className="finder-item" href={item.href}>
-          <span>
-            <span className="fi-name">{item.name}</span>
-            <span className="fi-sub">{item.detail}</span>
+        <button
+          type="button"
+          className={`os-island${island === "alert" ? " expanded" : ""}`}
+          onClick={cycleIsland}
+          aria-label={`Qisland 灵动岛，当前${islandView.title}，点击切换形态`}
+        >
+          <span className="oi-main">
+            <span className="oi-dot" aria-hidden="true" />
+            <span className="oi-title">{islandView.title}</span>
           </span>
-          <span className="fi-go">{item.action}</span>
-        </ExternalLink>
-      ))}
+          <span className="oi-val">{islandView.value}</span>
+        </button>
+
+        <main ref={desktopRef} className="desktop" id="desktop">
+          <div className="desk-icons">
+            {launcherOrder.map((id) => {
+              const icon = iconStyle[id];
+              const win = windows.find((item) => item.id === id);
+              const open = Boolean(win && !win.hidden);
+              return (
+                <button key={id} type="button" className={`desk-icon${open ? " is-open" : ""}`} aria-keyshortcuts={icon.shortcut} onClick={() => openWin(id)}>
+                  <span className="d-icon desk-mark" style={{ background: icon.gradient }} aria-hidden="true">
+                    {icon.mark}
+                  </span>
+                  <span className="desk-label">
+                    {id === "course" ? (
+                      <>
+                        Course
+                        <br />
+                        Workspace
+                      </>
+                    ) : (
+                      icon.label
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {windows.map((win) => {
+            const chrome = windowChrome[win.id];
+            const project = isProjectId(win.id) ? projectById[win.id] : null;
+            const release = project?.repo ? releases[project.repo] : undefined;
+            const badge = release?.tag ? `${release.tag} · ${chrome.badge}` : chrome.badge;
+            return (
+              <section
+                key={win.id}
+                id={`win-${win.id}`}
+                className={`win${focused === win.id && !win.hidden ? " focused" : ""}${win.hidden ? " hidden" : ""}${win.max ? " maximized" : ""}${dragging === win.id ? " dragging" : ""}${resizing === win.id ? " resizing" : ""}`}
+                style={win.max ? { zIndex: win.z } : { left: win.geom.x, top: win.geom.y, width: win.geom.w, height: win.geom.h, zIndex: win.z }}
+                aria-hidden={win.hidden}
+                inert={win.hidden ? true : undefined}
+                onPointerDown={() => {
+                  if (!win.hidden) focusWin(win.id);
+                }}
+              >
+                {win.max
+                  ? null
+                  : EDGES.map((edge) => (
+                      <div key={edge} className={`resize-handle resize-${edge}`} onPointerDown={(event) => onResizeDown(event, win.id, edge)} />
+                    ))}
+                <div
+                  className="win-bar"
+                  onPointerDown={(event) => onBarPointerDown(event, win.id)}
+                  onDoubleClick={(event) => {
+                    if ((event.target as HTMLElement).closest("button, a")) return;
+                    toggleMax(win.id);
+                  }}
+                >
+                  <div className="traffic">
+                    <button className="t-close" type="button" aria-label={`关闭${chrome.appName}`} onClick={() => hideWin(win.id)}>
+                      <span />
+                    </button>
+                    <button className="t-min" type="button" aria-label={`最小化${chrome.appName}`} onClick={() => hideWin(win.id)}>
+                      <span />
+                    </button>
+                    <button
+                      className="t-max"
+                      type="button"
+                      aria-label={win.max ? `还原${chrome.appName}` : `放大${chrome.appName}`}
+                      aria-pressed={win.max}
+                      onClick={() => toggleMax(win.id)}
+                    >
+                      <span />
+                    </button>
+                  </div>
+                  <div className="win-title">{chrome.title}</div>
+                  <div className="win-badge">{badge}</div>
+                </div>
+                <div className={`win-body${win.id === "xiangqi" ? " xq-host" : ""}`}>
+                  <WindowSurface
+                    id={win.id}
+                    releases={releases}
+                    tab={tabs[win.id] ?? "demo"}
+                    onTab={(tab) => setTabs((current) => ({ ...current, [win.id]: tab }))}
+                    demo={demo}
+                    onCopyEmail={copyEmail}
+                    onOpen={openWin}
+                    onXiangqiInteract={() => focusWin("xiangqi")}
+                  />
+                </div>
+              </section>
+            );
+          })}
+        </main>
+
+        <nav ref={dockRef} className="dock-bar" aria-label="Qiuizi OS Dock">
+          {dockItems.map((id) => {
+            const icon = iconStyle[id];
+            const win = windows.find((entry) => entry.id === id);
+            const open = Boolean(win && !win.hidden);
+            return (
+              <button key={id} type="button" className="d-app" aria-pressed={open} aria-keyshortcuts={icon.shortcut} onClick={() => onDock(id)}>
+                <span className="d-tip">{icon.label === "更多" ? "更多作品" : icon.label}</span>
+                <span className="d-icon" style={{ background: icon.gradient }} aria-hidden="true">
+                  {icon.mark}
+                </span>
+                <span className={`d-dot${open ? "" : " off"}`} aria-hidden="true" />
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="mobile-shell" inert={mobile ? undefined : true}>
+        <MobileHome
+          releases={releases}
+          sheet={sheet}
+          tab={sheet ? (tabs[sheet] ?? "demo") : "demo"}
+          onTab={(tab) => {
+            if (!sheet) return;
+            setTabs((current) => ({ ...current, [sheet]: tab }));
+          }}
+          demo={demo}
+          onOpen={openWin}
+          onClose={() => setSheet(null)}
+          onSearch={() => setPalette(true)}
+          onCopyEmail={copyEmail}
+        />
+      </div>
+
+      {palette ? <Spotlight commands={commands} onClose={() => setPalette(false)} /> : null}
+      {toast ? (
+        <div className="toast" role="status">
+          {toast}
+        </div>
+      ) : null}
     </div>
   );
 }
