@@ -53,6 +53,7 @@ export function OsDesktop() {
   const [unpacked, setUnpacked] = useState(false);
   const [xq, setXq] = useState(0);
   const [dragging, setDragging] = useState<WinId | null>(null);
+  const [wallpaperOn, setWallpaperOn] = useState(true);
   const desktopRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<HTMLElement>(null);
   const zRef = useRef(25);
@@ -251,7 +252,7 @@ export function OsDesktop() {
 
   return (
     <div className="os-root">
-      <Aurora />
+      <Aurora playing={wallpaperOn} />
       <div className="wallpaper-watermark" aria-hidden="true">
         Qiuizi
       </div>
@@ -269,6 +270,15 @@ export function OsDesktop() {
           </button>
           <button className="mb-btn" type="button" onClick={() => focusWin("finder")}>
             更多作品 (05–10)
+          </button>
+          <button
+            className={`mb-btn${wallpaperOn ? " is-on" : ""}`}
+            type="button"
+            aria-pressed={wallpaperOn}
+            aria-label={wallpaperOn ? "暂停背景动效" : "播放背景动效"}
+            onClick={() => setWallpaperOn((value) => !value)}
+          >
+            动效
           </button>
         </div>
         <div className="mb-right">

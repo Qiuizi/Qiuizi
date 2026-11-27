@@ -53,16 +53,21 @@ void main() {
   col += vec3(0.45, 0.95, 0.82) * b2 * b4 * 0.45;
 
   float spec = exp(-pow(w1, 2.0) * 28.0) + exp(-pow(w3, 2.0) * 22.0) * 0.75;
-  col += vec3(0.9, 0.97, 1.0) * spec * 0.62;
-  col += vec3(1.0, 0.82, 0.55) * exp(-pow(w4, 2.0) * 18.0) * 0.38;
+  col += vec3(0.35, 0.82, 1.0) * spec * 0.42;
+  col += vec3(1.0, 0.58, 0.62) * exp(-pow(w4, 2.0) * 18.0) * 0.28;
 
   float dust = pow(max(sin(p.x * 22.0 + t * 1.4) * sin(p.y * 17.0 - t * 1.1), 0.0), 16.0);
-  col += vec3(0.75, 0.92, 1.0) * dust * 0.45;
+  col += vec3(0.45, 0.82, 1.0) * dust * 0.28;
 
   float vig = smoothstep(1.55, 0.2, length(p));
   col *= mix(0.78, 1.0, vig);
-  col = col / (vec3(1.0) + col * 0.28);
-  gl_FragColor = vec4(col, 1.0);
+  col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
+  float peak = max(col.r, max(col.g, col.b));
+  float sat = peak - min(col.r, min(col.g, col.b));
+  vec3 hue = col / max(peak, 0.001);
+  float wash = smoothstep(0.62, 0.9, peak) * (1.0 - smoothstep(0.05, 0.24, sat));
+  col = mix(col, hue * 0.74, wash);
+  gl_FragColor = vec4(clamp(col, 0.0, 0.9), 1.0);
 }
 `;
 
@@ -78,10 +83,10 @@ type Ribbon = {
 };
 
 const RIBBONS: Ribbon[] = [
-  { y: 0.32, amp: 0.16, freq: 1.6, speed: 1.15, phase: 0.2, width: 0.2, color: "rgba(56, 220, 255, 0.55)", core: "rgba(230, 252, 255, 0.9)" },
-  { y: 0.48, amp: 0.2, freq: 1.15, speed: -0.86, phase: 1.4, width: 0.24, color: "rgba(90, 120, 255, 0.42)", core: "rgba(214, 226, 255, 0.75)" },
-  { y: 0.62, amp: 0.14, freq: 2.1, speed: 1.35, phase: 2.2, width: 0.16, color: "rgba(168, 92, 255, 0.4)", core: "rgba(244, 232, 255, 0.72)" },
-  { y: 0.4, amp: 0.11, freq: 0.85, speed: 0.72, phase: 0.8, width: 0.12, color: "rgba(255, 150, 176, 0.32)", core: "rgba(255, 228, 206, 0.7)" },
+  { y: 0.32, amp: 0.16, freq: 1.6, speed: 1.15, phase: 0.2, width: 0.2, color: "rgba(32, 196, 235, 0.5)", core: "rgba(64, 214, 255, 0.55)" },
+  { y: 0.48, amp: 0.2, freq: 1.15, speed: -0.86, phase: 1.4, width: 0.24, color: "rgba(72, 104, 245, 0.4)", core: "rgba(120, 146, 255, 0.5)" },
+  { y: 0.62, amp: 0.14, freq: 2.1, speed: 1.35, phase: 2.2, width: 0.16, color: "rgba(150, 84, 235, 0.38)", core: "rgba(186, 130, 255, 0.48)" },
+  { y: 0.4, amp: 0.11, freq: 0.85, speed: 0.72, phase: 0.8, width: 0.12, color: "rgba(232, 112, 146, 0.3)", core: "rgba(255, 156, 132, 0.42)" },
 ];
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
@@ -96,14 +101,15 @@ function compile(gl: WebGLRenderingContext, type: number, source: string) {
   return shader;
 }
 
-export function Aurora() {
+export function Aurora({ playing = true }: { playing?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const playingRef = useRef(playing);
+  const startRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pointer = { x: 0.5, y: 0.5 };
     const target = { x: 0.5, y: 0.5 };
     let frame = 0;
@@ -197,6 +203,8 @@ export function Aurora() {
         ctx.stroke();
       }
       ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "rgba(6, 14, 32, 0.16)";
+      ctx.fillRect(0, 0, width, height);
     };
 
     const draw = (time: number) => {
@@ -205,7 +213,7 @@ export function Aurora() {
     };
 
     const loop = (now: number) => {
-      if (!running) return;
+      if (!running || !playingRef.current) return;
       draw(now * 0.001);
       frame = requestAnimationFrame(loop);
     };
@@ -217,13 +225,16 @@ export function Aurora() {
 
     const start = () => {
       cancelAnimationFrame(frame);
-      if (motion.matches || document.hidden) {
-        draw(2.6);
+      if (document.hidden) return;
+      if (!playingRef.current) {
+        running = false;
+        draw(performance.now() * 0.001);
         return;
       }
       running = true;
       frame = requestAnimationFrame(loop);
     };
+    startRef.current = start;
 
     const stop = () => {
       running = false;
@@ -239,16 +250,19 @@ export function Aurora() {
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", start);
     document.addEventListener("visibilitychange", onVisibility);
-    motion.addEventListener("change", start);
 
     return () => {
       stop();
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("resize", start);
       document.removeEventListener("visibilitychange", onVisibility);
-      motion.removeEventListener("change", start);
     };
   }, []);
+
+  useEffect(() => {
+    playingRef.current = playing;
+    startRef.current();
+  }, [playing]);
 
   return (
     <div className="wallpaper" aria-hidden="true">
