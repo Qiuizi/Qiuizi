@@ -1,5 +1,5 @@
-import { PaginatedHome } from "@/components/paginated-home";
+import { OsDesktop } from "@/components/os-desktop";
 
-export default function Home() {
-  return <PaginatedHome />;
+export default function HomePage() {
+  return <OsDesktop />;
 }
