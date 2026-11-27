@@ -45,29 +45,32 @@ void main() {
   float b3 = ridge((w3 + 0.15) * 0.58);
   float b4 = ridge((w4 - 0.2) * 0.5);
 
-  vec3 col = vec3(0.012, 0.02, 0.055);
-  col += vec3(0.12, 0.95, 1.0) * b1 * 1.25;
-  col += vec3(0.22, 0.48, 1.0) * b2 * 1.05;
-  col += vec3(0.62, 0.32, 1.0) * b3 * 0.95;
-  col += vec3(1.0, 0.62, 0.72) * b4 * 0.72;
-  col += vec3(0.45, 0.95, 0.82) * b2 * b4 * 0.45;
+  vec3 col = vec3(0.009, 0.010, 0.018);
+  col += vec3(0.040, 0.060, 0.140) * b1;
+  col += vec3(0.034, 0.052, 0.112) * b2;
+  col += vec3(0.062, 0.036, 0.118) * b3;
+  col += vec3(0.026, 0.058, 0.076) * b4;
+  col += vec3(0.026, 0.040, 0.078) * b1 * b3 * 0.18;
 
-  float spec = exp(-pow(w1, 2.0) * 28.0) + exp(-pow(w3, 2.0) * 22.0) * 0.75;
-  col += vec3(0.35, 0.82, 1.0) * spec * 0.42;
-  col += vec3(1.0, 0.58, 0.62) * exp(-pow(w4, 2.0) * 18.0) * 0.28;
+  float crest = exp(-pow(w1, 2.0) * 58.0);
+  float crestB = exp(-pow(w3, 2.0) * 48.0);
+  col += vec3(0.18, 0.22, 0.32) * crest * 0.26;
+  col += vec3(0.12, 0.10, 0.20) * crestB * 0.14;
 
-  float dust = pow(max(sin(p.x * 22.0 + t * 1.4) * sin(p.y * 17.0 - t * 1.1), 0.0), 16.0);
-  col += vec3(0.45, 0.82, 1.0) * dust * 0.28;
+  float dust = pow(max(sin(p.x * 22.0 + t * 1.4) * sin(p.y * 17.0 - t * 1.1), 0.0), 18.0);
+  col += vec3(0.14, 0.18, 0.26) * dust * 0.038;
 
-  float vig = smoothstep(1.55, 0.2, length(p));
-  col *= mix(0.78, 1.0, vig);
-  col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
-  float peak = max(col.r, max(col.g, col.b));
-  float sat = peak - min(col.r, min(col.g, col.b));
-  vec3 hue = col / max(peak, 0.001);
-  float wash = smoothstep(0.62, 0.9, peak) * (1.0 - smoothstep(0.05, 0.24, sat));
-  col = mix(col, hue * 0.74, wash);
-  gl_FragColor = vec4(clamp(col, 0.0, 0.9), 1.0);
+  float vig = smoothstep(1.38, 0.26, length(p));
+  col *= mix(0.34, 1.0, vig);
+
+  vec3 mapped = col * (0.48 * col + 0.055);
+  mapped = mapped / (col * (0.62 * col + 0.42) + 0.075);
+  float peak = max(mapped.r, max(mapped.g, mapped.b));
+  float sat = peak - min(mapped.r, min(mapped.g, mapped.b));
+  vec3 hue = mapped / max(peak, 0.001);
+  float wash = smoothstep(0.30, 0.48, peak) * (1.0 - smoothstep(0.02, 0.14, sat));
+  mapped = mix(mapped, hue * 0.32, wash);
+  gl_FragColor = vec4(clamp(mapped, 0.0, 0.40), 1.0);
 }
 `;
 
@@ -83,11 +86,18 @@ type Ribbon = {
 };
 
 const RIBBONS: Ribbon[] = [
-  { y: 0.32, amp: 0.16, freq: 1.6, speed: 1.15, phase: 0.2, width: 0.2, color: "rgba(32, 196, 235, 0.5)", core: "rgba(64, 214, 255, 0.55)" },
-  { y: 0.48, amp: 0.2, freq: 1.15, speed: -0.86, phase: 1.4, width: 0.24, color: "rgba(72, 104, 245, 0.4)", core: "rgba(120, 146, 255, 0.5)" },
-  { y: 0.62, amp: 0.14, freq: 2.1, speed: 1.35, phase: 2.2, width: 0.16, color: "rgba(150, 84, 235, 0.38)", core: "rgba(186, 130, 255, 0.48)" },
-  { y: 0.4, amp: 0.11, freq: 0.85, speed: 0.72, phase: 0.8, width: 0.12, color: "rgba(232, 112, 146, 0.3)", core: "rgba(255, 156, 132, 0.42)" },
+  { y: 0.32, amp: 0.16, freq: 1.6, speed: 1.15, phase: 0.2, width: 0.2, color: "rgba(22, 40, 88, 0.28)", core: "rgba(110, 140, 180, 0.18)" },
+  { y: 0.48, amp: 0.2, freq: 1.15, speed: -0.86, phase: 1.4, width: 0.24, color: "rgba(16, 32, 70, 0.26)", core: "rgba(90, 118, 164, 0.15)" },
+  { y: 0.62, amp: 0.14, freq: 2.1, speed: 1.35, phase: 2.2, width: 0.16, color: "rgba(42, 28, 78, 0.24)", core: "rgba(118, 98, 156, 0.15)" },
+  { y: 0.4, amp: 0.11, freq: 0.85, speed: 0.72, phase: 0.8, width: 0.12, color: "rgba(14, 48, 62, 0.2)", core: "rgba(72, 128, 138, 0.13)" },
 ];
+
+// One clock for the shader and the canvas fallback. 0.3 is about a third of the previous pace.
+const DRIFT = 0.3;
+
+function flowTime(now: number) {
+  return now * 0.001 * DRIFT;
+}
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
@@ -112,8 +122,11 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
 
     const pointer = { x: 0.5, y: 0.5 };
     const target = { x: 0.5, y: 0.5 };
+    const pointerEase = 0.02;
     let frame = 0;
     let running = true;
+    let held = 0;
+    let seen = false;
     let mode: "gl" | "2d" = "2d";
 
     const resize = () => {
@@ -159,8 +172,8 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
           drawGL = (time) => {
             const { width, height } = resize();
             gl.viewport(0, 0, width, height);
-            pointer.x += (target.x - pointer.x) * 0.05;
-            pointer.y += (target.y - pointer.y) * 0.05;
+            pointer.x += (target.x - pointer.x) * pointerEase;
+            pointer.y += (target.y - pointer.y) * pointerEase;
             gl.uniform2f(uRes, width, height);
             gl.uniform1f(uTime, time);
             gl.uniform2f(uPointer, pointer.x, pointer.y);
@@ -176,10 +189,10 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
     const draw2D = (time: number) => {
       if (!ctx) return;
       const { width, height } = resize();
-      pointer.x += (target.x - pointer.x) * 0.05;
-      pointer.y += (target.y - pointer.y) * 0.05;
+      pointer.x += (target.x - pointer.x) * pointerEase;
+      pointer.y += (target.y - pointer.y) * pointerEase;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = "#070b16";
+      ctx.fillStyle = "#05070c";
       ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = "lighter";
       const shift = (pointer.x - 0.5) * height * 0.08;
@@ -203,7 +216,19 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
         ctx.stroke();
       }
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgba(6, 14, 32, 0.16)";
+      ctx.fillStyle = "rgba(3, 5, 10, 0.42)";
+      ctx.fillRect(0, 0, width, height);
+      const vignette = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.45,
+        Math.min(width, height) * 0.18,
+        width * 0.5,
+        height * 0.5,
+        Math.max(width, height) * 0.72,
+      );
+      vignette.addColorStop(0, "rgba(5, 7, 12, 0)");
+      vignette.addColorStop(1, "rgba(2, 3, 6, 0.6)");
+      ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
     };
 
@@ -214,7 +239,9 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
 
     const loop = (now: number) => {
       if (!running || !playingRef.current) return;
-      draw(now * 0.001);
+      held = flowTime(now);
+      seen = true;
+      draw(held);
       frame = requestAnimationFrame(loop);
     };
 
@@ -228,7 +255,7 @@ export function Aurora({ playing = true }: { playing?: boolean }) {
       if (document.hidden) return;
       if (!playingRef.current) {
         running = false;
-        draw(performance.now() * 0.001);
+        draw(seen ? held : flowTime(performance.now()));
         return;
       }
       running = true;

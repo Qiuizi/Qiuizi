@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1020",
+  themeColor: "#05070c",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -36,7 +36,7 @@ export default function RootLayout({
         <style
           dangerouslySetInnerHTML={{
             __html:
-              ".menubar,.os-island,.win,.dock-bar{backdrop-filter:blur(28px) saturate(185%);-webkit-backdrop-filter:blur(28px) saturate(185%)}",
+              ".menubar,.os-island,.win,.dock-bar{backdrop-filter:blur(28px) saturate(145%);-webkit-backdrop-filter:blur(28px) saturate(145%)}",
           }}
         />
         {children}
