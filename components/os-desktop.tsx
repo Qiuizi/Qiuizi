@@ -108,40 +108,6 @@ export function OsDesktop() {
     );
   }
 
-  function tile() {
-    const b = box();
-    const gap = 16;
-    const top = islandClear;
-    setWindows((current) => {
-      const xiangqiOpen = current.some((win) => win.id === "xiangqi" && !win.hidden);
-      const finderOpen = current.some((win) => win.id === "finder" && !win.hidden);
-      const placed: Partial<Record<WinId, Geom>> = {};
-      if (xiangqiOpen) {
-        const right = Math.min(520, Math.max(400, Math.round(b.w * 0.36)));
-        const col = Math.max(220, (b.w - right - gap * 4) / 2);
-        const row = Math.max(160, Math.round((b.h - top - gap * 2) / 2));
-        placed.qisland = { x: gap, y: top, w: col };
-        placed.deepunpack = { x: gap * 2 + col, y: top, w: col };
-        placed.coursedesk = { x: gap, y: top + gap + row, w: col };
-        placed.lightskip = { x: gap * 2 + col, y: top + gap + row, w: col };
-        placed.xiangqi = { x: b.w - gap - right, y: top, w: right };
-      } else {
-        const col = Math.max(240, (b.w - gap * 3) / 2);
-        const row = Math.max(160, Math.round((b.h - top - gap * 2) / 2));
-        placed.qisland = { x: gap, y: top, w: col };
-        placed.deepunpack = { x: gap * 2 + col, y: top, w: col };
-        placed.coursedesk = { x: gap, y: top + gap + row, w: col };
-        placed.lightskip = { x: gap * 2 + col, y: top + gap + row, w: col };
-      }
-      if (finderOpen) placed.finder = { x: Math.max(gap, Math.round((b.w - 440) / 2)), y: top + 28, w: Math.min(440, b.w - gap * 2) };
-      return current.map((win) => {
-        const geom = placed[win.id];
-        if (!geom) return win;
-        return { ...win, geom, max: false, hidden: defaultOpen.has(win.id) ? false : win.hidden };
-      });
-    });
-  }
-
   function resetLayout() {
     setWindows((current) =>
       current.map((win) => ({
@@ -259,7 +225,6 @@ export function OsDesktop() {
     };
   }, []);
 
-  const active = windows.find((win) => win.id === focused);
   const islandView = islandCopy[island];
 
   function cycleIsland() {
@@ -277,16 +242,14 @@ export function OsDesktop() {
       <header className="menubar">
         <div className="mb-left">
           <span className="mb-brand">◆ Qiuizi OS</span>
-          <span className="mb-active">{active && !active.hidden ? active.appName : "桌面"}</span>
-          <button className="mb-btn mb-btn-wide" type="button" onClick={tile}>
-            整齐平铺
-          </button>
-          <button className="mb-btn mb-btn-wide" type="button" onClick={resetLayout}>
-            恢复桌面布局
+          <button className="mb-btn" type="button" onClick={resetLayout}>
+            重置布局
           </button>
           <button className="mb-btn" type="button" onClick={() => focusWin("finder")}>
-            更多作品 (05–10)
+            更多作品
           </button>
+        </div>
+        <div className="mb-right">
           <button
             className={`mb-btn${wallpaperOn ? " is-on" : ""}`}
             type="button"
@@ -296,11 +259,8 @@ export function OsDesktop() {
           >
             动效
           </button>
-        </div>
-        <div className="mb-right">
-          <span className="mb-hint">拖动任意窗口标题栏 · 点击置顶</span>
           <ExternalLink href={site.github} className="mb-gh">
-            GitHub @{site.name} ↗
+            GitHub ↗
           </ExternalLink>
         </div>
       </header>
@@ -488,9 +448,9 @@ function LightSkipBody() {
     <>
       <p className="win-desc">不联网、零第三方依赖的 Android 开屏广告自动跳过工具。零 INTERNET 权限，默认白名单生效，内置 25 套规则与本地录制，并附国产 ROM 保活指引。</p>
       <div className="ls-badges" aria-label="LightSkip 特性">
-        <span>零联网</span>
-        <span>白名单</span>
-        <span>25 套规则</span>
+        <span className="ls-pill">零联网</span>
+        <span className="ls-pill">白名单</span>
+        <span className="ls-pill">25 套规则</span>
       </div>
       <div className="ls-stage" aria-live="polite">
         {phase === "splash" ? (
