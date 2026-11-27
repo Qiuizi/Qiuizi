@@ -1,55 +1,43 @@
-import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
-// 思源宋体 (Noto Serif SC) —— 中文 display (给 .font-display 兜底).
-import "@fontsource/noto-serif-sc/chinese-simplified-400.css";
-import "@fontsource/noto-serif-sc/chinese-simplified-500.css";
-import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { site } from "@/lib/site";
-import { SmoothScroll } from "@/components/smooth-scroll";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
-import { Loader } from "@/components/loader";
-import { Cursor } from "@/components/cursor";
-
-// Playfair Display —— Latin display (italic 极佳).
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-// Inter —— 现代无衬线正文.
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
+import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: site.title,
-  description: site.bio,
+  description: site.description,
+  applicationName: site.name,
+  authors: [{ name: site.person, url: site.github }],
+  creator: site.person,
+  alternates: { canonical: "/" },
   openGraph: {
     title: site.title,
-    description: site.bio,
+    description: site.description,
+    url: "/",
+    siteName: site.name,
+    locale: "zh_CN",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#eef1f6",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN" className={`${playfair.variable} ${inter.variable}`}>
-      <body className="bg-background text-foreground font-sans">
-        <Loader />
-        <Cursor />
-        <SmoothScroll />
-        <Nav />
-        <main className="relative">{children}</main>
-        <Footer />
+    <html lang="zh-CN">
+      <body className="bg-canvas font-sans text-ink antialiased">
+        <SiteHeader />
+        {children}
+        <SiteFooter />
       </body>
     </html>
   );
