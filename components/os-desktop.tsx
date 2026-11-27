@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Aurora } from "@/components/aurora";
 import { ExternalLink } from "@/components/external-link";
+import { XiangqiBoard } from "@/components/xiangqi-board";
 import {
   courseNotes,
   dockItems,
@@ -10,7 +11,6 @@ import {
   flagshipOrder,
   homeLayout,
   islandCopy,
-  xiangqiSteps,
   type Geom,
   type IslandMode,
   type WinId,
@@ -51,7 +51,6 @@ export function OsDesktop() {
   const [island, setIsland] = useState<IslandMode>("focus");
   const [note, setNote] = useState<1 | 2 | 3>(1);
   const [unpacked, setUnpacked] = useState(false);
-  const [xq, setXq] = useState(0);
   const [dragging, setDragging] = useState<WinId | null>(null);
   const [wallpaperOn, setWallpaperOn] = useState(true);
   const desktopRef = useRef<HTMLDivElement>(null);
@@ -108,13 +107,15 @@ export function OsDesktop() {
   function tile() {
     const b = box();
     const gap = 14;
-    const col = Math.max(260, (b.w - gap * 3) / 2);
-    const row = Math.max(160, (b.h - gap * 3) / 2);
+    const right = Math.min(520, Math.max(360, b.w * 0.38));
+    const left = Math.max(260, b.w - gap * 3 - right);
+    const mid = Math.max(200, Math.round((b.h - gap * 3) * 0.42));
+    const half = Math.max(220, (left - gap) / 2);
     const placed: Partial<Record<WinId, Geom>> = {
-      qisland: { x: gap, y: gap, w: col },
-      deepunpack: { x: gap * 2 + col, y: gap, w: col },
-      coursedesk: { x: gap, y: gap * 2 + row, w: col },
-      xiangqi: { x: gap * 2 + col, y: gap * 2 + row, w: col },
+      qisland: { x: gap, y: gap, w: half },
+      deepunpack: { x: gap * 2 + half, y: gap, w: half },
+      coursedesk: { x: gap, y: gap * 2 + mid, w: left },
+      xiangqi: { x: gap * 2 + left, y: gap, w: right },
     };
     setWindows((current) =>
       current.map((win) => {
@@ -244,7 +245,6 @@ export function OsDesktop() {
 
   const active = windows.find((win) => win.id === focused);
   const islandView = islandCopy[island];
-  const step = xiangqiSteps[xq];
 
   function cycleIsland() {
     setIsland((mode) => (mode === "focus" ? "media" : mode === "media" ? "alert" : "focus"));
@@ -335,18 +335,13 @@ export function OsDesktop() {
               <div className="win-title">{win.title}</div>
               <div className="win-badge">{win.badge}</div>
             </div>
-            <div className="win-body">
+            <div className={`win-body${win.id === "xiangqi" ? " xq-host" : ""}`}>
               {win.id === "qisland" ? (
                 <QislandBody mode={island} onMode={setIsland} />
               ) : null}
               {win.id === "coursedesk" ? <CourseBody note={note} onNote={setNote} /> : null}
               {win.id === "deepunpack" ? <UnpackBody unpacked={unpacked} onToggle={() => setUnpacked((value) => !value)} /> : null}
-              {win.id === "xiangqi" ? (
-                <XiangqiBody
-                  step={step}
-                  onStep={() => setXq((value) => (value + 1) % xiangqiSteps.length)}
-                />
-              ) : null}
+              {win.id === "xiangqi" ? <XiangqiBoard onInteract={() => focusWin("xiangqi")} /> : null}
               {win.id === "finder" ? <FinderBody /> : null}
             </div>
           </section>
@@ -454,54 +449,6 @@ function UnpackBody({ unpacked, onToggle }: { unpacked: boolean; onToggle: () =>
         <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/DeepUnpack">GitHub 源码 ↗</ExternalLink>
       </div>
     </>
-  );
-}
-
-function XiangqiBody({
-  step,
-  onStep,
-}: {
-  step: (typeof xiangqiSteps)[number];
-  onStep: () => void;
-}) {
-  const gx = (x: number) => 28 + x * 38;
-  const gy = (y: number) => 22 + y * 38;
-  const pieces = [
-    { x: step.cannon[0], y: step.cannon[1], label: "炮", red: true },
-    { x: step.horse[0], y: step.horse[1], label: "马", red: false },
-    { x: 4, y: 0, label: "将", red: false },
-  ];
-  return (
-    <div className="xq-wrap">
-      <div className="xq-board">
-        <svg viewBox="0 0 360 200" role="img" aria-label={step.label}>
-          {Array.from({ length: 5 }, (_, row) => (
-            <line key={`r${row}`} x1="28" y1={gy(row)} x2="332" y2={gy(row)} stroke="rgba(255,220,190,0.22)" />
-          ))}
-          {Array.from({ length: 9 }, (_, col) => (
-            <line key={`c${col}`} x1={gx(col)} y1="22" x2={gx(col)} y2="174" stroke="rgba(255,220,190,0.22)" />
-          ))}
-          <text x="180" y="102" textAnchor="middle" fill="rgba(255,220,190,0.28)" fontSize="11" letterSpacing="8">
-            楚河 · 汉界
-          </text>
-          {pieces.map((piece) => (
-            <g key={piece.label} transform={`translate(${gx(piece.x)} ${gy(piece.y)})`}>
-              <circle r="14" fill={piece.red ? "#45121B" : "#171B24"} stroke={piece.red ? "#FB7185" : "#CBD5E1"} strokeWidth="1.6" />
-              <text y="5" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700">
-                {piece.label}
-              </text>
-            </g>
-          ))}
-        </svg>
-      </div>
-      <div className="xq-side">
-        <div className="xq-log" aria-live="polite">{step.label}</div>
-        <button type="button" className="w-chip is-on" onClick={onStep}>
-          走下一步
-        </button>
-        <ExternalLink className="w-link w-ghost" href="https://github.com/Qiuizi/XiangqiStudio">GitHub ↗</ExternalLink>
-      </div>
-    </div>
   );
 }
 

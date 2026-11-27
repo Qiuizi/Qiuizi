@@ -7,11 +7,11 @@ export type IslandMode = "focus" | "media" | "alert";
 export const flagshipOrder = ["qisland", "coursedesk", "deepunpack", "xiangqi"] as const;
 
 export const homeLayout: Record<WinId, Geom> = {
-  qisland: { x: 52, y: 66, w: 430 },
-  coursedesk: { x: 92, y: 372, w: 460 },
-  deepunpack: { x: 910, y: 62, w: 465 },
-  xiangqi: { x: 820, y: 360, w: 540 },
-  finder: { x: 490, y: 150, w: 470 },
+  qisland: { x: 28, y: 18, w: 400 },
+  deepunpack: { x: 444, y: 18, w: 420 },
+  coursedesk: { x: 28, y: 360, w: 836 },
+  xiangqi: { x: 884, y: 18, w: 528 },
+  finder: { x: 460, y: 140, w: 400 },
 };
 
 export const islandCopy: Record<IslandMode, { title: string; value: string }> = {
@@ -25,12 +25,6 @@ export const courseNotes = {
   2: "② 自动标出与前序章节的概念关联，把零散单讲织成课程图谱。",
   3: "③ 基于本讲课件与录音上下文随时追问 AI，直接生成自测题。",
 } as const;
-
-export const xiangqiSteps = [
-  { label: "开局 · 红方先行", cannon: [7, 3], horse: [1, 1] },
-  { label: "炮二平五（当头炮）", cannon: [4, 3], horse: [1, 1] },
-  { label: "马 8 进 7（屏风马）", cannon: [4, 3], horse: [2, 2] },
-] as const;
 
 export const finderItems = [
   {
